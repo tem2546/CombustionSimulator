@@ -56,9 +56,9 @@
           <!-- ノイズ除去実行の選択 -->
           <div class="field">
             <div class="field-head">
-              <label for="noise_removed">ノイズ除去の実行</label>
+              <label for="noiseremoved">ノイズ除去の実行</label>
             </div>
-            <select id="noise_removed">
+            <select id="noiseremoved">
               <option value="No">No（ノイズ除去をしない）</option>
               <option value="Yes">Yes（ノイズ除去を行った結果も表示）</option>
             </select>
@@ -68,9 +68,9 @@
           <!-- スパイクカット実行の選択 -->
           <div class="field">
             <div class="field-head">
-              <label for="spike_cut">スパイクカットの実行</label>
+              <label for="spikecut">スパイクカットの実行</label>
             </div>
-            <select id="spike_cut">
+            <select id="spikecut">
               <option value="No">No（スパイクカットをしない）</option>
               <option value="Yes">Yes（異常な突出値を除去）</option>
             </select>
@@ -80,9 +80,9 @@
           <!-- csvファイル出力の選択 -->
           <div class="field">
             <div class="field-head">
-              <label for="csv_out">CSVファイル出力</label>
+              <label for="csvout">CSVファイル出力</label>
             </div>
-            <select id="csv_out">
+            <select id="csvout">
               <option value="Yes">Yes（整理後の推力履歴をCSV保存する）</option>
               <option value="No">No（CSV保存しない）</option>
             </select>
@@ -125,11 +125,11 @@
       </div>
 
   
-
+    </div>
+  </div>
   <!-- スクリプト読み込み（ビルド方法に応じてパスを調整） -->
   <script type="module" src="./js/app.js" defer></script>
 
-  </script>
 
 </body>
 </html>
