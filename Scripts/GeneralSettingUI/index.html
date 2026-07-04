@@ -37,13 +37,25 @@
   <div class="grid">
     <div class="left">
 
+      <!-- データ整理モード -->
       <div id="panel_mode1" class="mode-panel">
         <fieldset>
           <legend>1. データ整理 モード</legend>
-          <p>ここにデータ整理用のファイル選択欄などを後で入れます。</p>
+          
+          <div class="field">
+            <div class="field-head">
+              <label data-i18n="model.thrust">推力履歴データ (.xlsx/.csv/.txt)</label>
+            </div>
+            <div class="filerow">
+              <button id="pickThrustBtn" class="btn" data-i18n="model.pickThrust">推力履歴を選択</button>
+              <span id="thrust_fn_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+
         </fieldset>
       </div>
 
+      <!-- データ比較モード -->
       <div id="panel_mode2" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>2. データ比較 モード</legend>
@@ -51,6 +63,7 @@
         </fieldset>
       </div>
 
+      <!-- CEA_GUIモード -->
       <div id="panel_mode3" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>3. CEA_GUI モード</legend>
@@ -58,6 +71,7 @@
         </fieldset>
       </div>
 
+      <!-- 自作エンジン解析モード -->
       <div id="panel_mode4" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>4. 自作エンジン解析 モード</legend>
@@ -65,6 +79,7 @@
         </fieldset>
       </div>
 
+      <!-- エンジンパラメータ設計モード -->
       <div id="panel_mode5" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>5. エンジンパラメータ設計 モード</legend>
@@ -574,21 +589,6 @@
   <!-- スクリプト読み込み（ビルド方法に応じてパスを調整） -->
   <script type="module" src="./js/app.js" defer></script>
 
-
-  <script>
-    document.getElementById('modeSelect').addEventListener('change', function() {
-      // すべてのモードパネルを非表示にする
-      const panels = document.querySelectorAll('.mode-panel');
-      panels.forEach(panel => {
-        panel.style.display = 'none';
-      });
-
-      // 選択されたモードのパネルだけを表示する
-      const activePanel = document.getElementById('panel_' + this.value);
-      if (activePanel) {
-        activePanel.style.display = 'block';
-      }
-    });
   </script>
 
 </body>

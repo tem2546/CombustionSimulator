@@ -4,6 +4,7 @@ CS_モード追加マニュアル(課題風)(CS.ver4.1.0想定)/
 Output/
 SaveData/
 SUBARU/
+settings.json
 *.xlsx
 *.csv
 *.inp
@@ -13,3 +14,5 @@ SUBARU/
 *.bat
 *.htm
 *.ja
+*.log
+*.spec
