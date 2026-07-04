@@ -22,6 +22,56 @@
     <span id="msg" class="status mono"></span>
   </div>
 
+  <!-- モード選択 -->
+  <div class="mode-selector-container" style="margin: 20px; padding: 15px; background: rgba(245, 245, 245, 0.8); border: 1px solid #ccc; border-radius: 6px; display: flex; align-items: center;">
+    <label for="modeSelect" style="font-weight: bold; margin-right: 15px; color: #333;" data-i18n="mode.select_label">実行モードを選択してください:</label>
+    <select id="modeSelect" style="padding: 6px 12px; font-size: 15px; border-radius: 4px; border: 1px solid #bbb; background: #fff; cursor: pointer; min-width: 300px;">
+      <option value="mode1">1. データ整理</option>
+      <option value="mode2">2. データ比較（複数データ整理）</option>
+      <option value="mode3">3. CEA_GUI</option>
+      <option value="mode4">4. 自作エンジン解析（4パラメータ同定）</option>
+      <option value="mode5">5. エンジンパラメータ設計</option>
+    </select>
+  </div>
+
+  <div class="grid">
+    <div class="left">
+
+      <div id="panel_mode1" class="mode-panel">
+        <fieldset>
+          <legend>1. データ整理 モード</legend>
+          <p>ここにデータ整理用のファイル選択欄などを後で入れます。</p>
+        </fieldset>
+      </div>
+
+      <div id="panel_mode2" class="mode-panel" style="display:none;">
+        <fieldset>
+          <legend>2. データ比較 モード</legend>
+          <p>ここに複数データの比較設定を後で入れます。</p>
+        </fieldset>
+      </div>
+
+      <div id="panel_mode3" class="mode-panel" style="display:none;">
+        <fieldset>
+          <legend>3. CEA_GUI モード</legend>
+          <p>ここにCEA用のパラメータ入力を後で入れます。</p>
+        </fieldset>
+      </div>
+
+      <div id="panel_mode4" class="mode-panel" style="display:none;">
+        <fieldset>
+          <legend>4. 自作エンジン解析 モード</legend>
+          <p>ここにSUBARU解析用の変数を後で入れます。</p>
+        </fieldset>
+      </div>
+
+      <div id="panel_mode5" class="mode-panel" style="display:none;">
+        <fieldset>
+          <legend>5. エンジンパラメータ設計 モード</legend>
+          <p>ここに初期スロート径などの設計変数を後で入れます。</p>
+        </fieldset>
+      </div>
+
   <!-- 左右２カラム -->
   <div class="grid">
 
@@ -523,5 +573,23 @@
 
   <!-- スクリプト読み込み（ビルド方法に応じてパスを調整） -->
   <script type="module" src="./js/app.js" defer></script>
+
+
+  <script>
+    document.getElementById('modeSelect').addEventListener('change', function() {
+      // すべてのモードパネルを非表示にする
+      const panels = document.querySelectorAll('.mode-panel');
+      panels.forEach(panel => {
+        panel.style.display = 'none';
+      });
+
+      // 選択されたモードのパネルだけを表示する
+      const activePanel = document.getElementById('panel_' + this.value);
+      if (activePanel) {
+        activePanel.style.display = 'block';
+      }
+    });
+  </script>
+
 </body>
 </html>
