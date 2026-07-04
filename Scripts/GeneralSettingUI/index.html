@@ -13,11 +13,11 @@
 
   <!-- 上部ツールバー -->
   <div class="toolbar">
-    <button id="loadBtn" class="btn" data-i18n="toolbar.load">初期値を読み込む</button>
-    <button id="loadPreBtn" class="btn" data-i18n="toolbar.loadPre">前回設定を読み込み</button>
-    <button id="saveBtn" class="btn primary" data-i18n="toolbar.save">現在の設定を保存して終了</button>
-    <button id="saveAsBtn" class="btn" data-i18n="toolbar.saveAs">名前を付けて保存…</button>
-    <button id="openFileBtn" class="btn" data-i18n="toolbar.open">設定ファイルを開く…</button>
+    <button id="loadBtn" class="btn" data-i18n="toolbar.load" disabled>初期値を読み込む</button>
+    <button id="loadPreBtn" class="btn" data-i18n="toolbar.loadPre" disabled>前回設定を読み込み</button>
+    <button id="saveBtn" class="btn primary" data-i18n="toolbar.save" disabled>現在の設定を保存して終了</button>
+    <button id="saveAsBtn" class="btn" data-i18n="toolbar.saveAs" disabled>名前を付けて保存…</button>
+    <button id="openFileBtn" class="btn" data-i18n="toolbar.open" disabled>設定ファイルを開く…</button>
     <button id="langToggle" class="btn lang" type="button">English</button>
     <span id="msg" class="status mono"></span>
   </div>
@@ -59,8 +59,8 @@
               <label for="noiseremoved">ノイズ除去の実行</label>
             </div>
             <select id="noiseremoved">
-              <option value="No">No（ノイズ除去をしない）</option>
               <option value="Yes">Yes（ノイズ除去を行った結果も表示）</option>
+              <option value="No">No（ノイズ除去をしない）</option>
             </select>
             <span class="note">推力データ全体の移動平均などのノイズ処理を行うか選択します。</span>
           </div>
@@ -71,8 +71,8 @@
               <label for="spikecut">スパイクカットの実行</label>
             </div>
             <select id="spikecut">
-              <option value="No">No（スパイクカットをしない）</option>
               <option value="Yes">Yes（異常な突出値を除去）</option>
+              <option value="No">No（スパイクカットをしない）</option>
             </select>
             <span class="note">センサーの異常値（スパイクノイズ）を自動カットするか選択します。</span>
           </div>
@@ -121,6 +121,33 @@
         <fieldset>
           <legend>5. エンジンパラメータ設計 モード</legend>
           <p>ここに初期スロート径などの設計変数を後で入れます。</p>
+        </fieldset>
+      </div>
+
+      <div id="panel_output" class="common-panel" style="margin-top: 25px;">
+        <fieldset style="border: 1px solid #1a7f37; border-radius: 6px;">
+          <legend style="color: #1a7f37; font-weight: bold; padding: 0 8px;">出力設定</legend>
+
+          <div class="field">
+            <div class="field-head">
+              <label for="outputModeSelect">保存先モード</label>
+            </div>
+            <select id="outputModeSelect" style="min-width: 250px;">
+              <option value="auto">自動（デフォルトの Output フォルダ）</option>
+              <option value="manual">手動（保存先を自分で指定する）</option>
+            </select>
+          </div>
+
+          <div id="manual_path_row" class="field" style="display: none;">
+            <div class="field-head">
+              <label>出力先フォルダ</label>
+            </div>
+            <div class="filerow">
+              <button id="pickDirBtn" class="btn">保存先フォルダを選択</button>
+              <span id="result_path_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+
         </fieldset>
       </div>
 
