@@ -1,0 +1,7 @@
+pyinstaller --noconfirm --onefile --windowed --name GeneralSettingUI ^
+  --icon assets/icon.ico ^
+  --add-data "index.html;." ^
+  --add-data "js;js" ^
+  --add-data "assets;assets" ^
+  --hidden-import openpyxl ^
+  app.py

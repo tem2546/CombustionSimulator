@@ -1,0 +1,413 @@
+/* =========================================
+   Rocket Simulation Light Theme
+   Base: #FFFFFF / Text: #0B0D10 / Accent: #FF7A18
+   ========================================= */
+:root{
+  --c-bg: #ffffff;          /* 背景(白) */
+  --c-surface: #ffffff;     /* カード背景(白) */
+  --c-border: #e6e8eb;      /* 枠線(ライトグレー) */
+  --c-text: #0b0d10;        /* 文字(ほぼ黒) */
+  --c-muted: #6b7785;       /* 補助文字 */
+  --c-accent: #ff7a18;      /* アクセント(オレンジ) */
+  --c-accent-weak: #ff9a4d; /* アクセント(薄) */
+  --c-focus: rgba(255,122,24,0.35);
+
+  /* 状態色（識別性向上・テーマのオレンジは維持） */
+  --c-ok:   #13854e;        /* 正常・選択済(緑) */
+  --c-warn: #b54708;        /* 警告(アンバー) */
+  --c-err:  #b42318;        /* エラー(赤) */
+
+  --radius: 10px;
+  --radius-sm: 8px;
+  --shadow-1: 0 10px 24px rgba(15,23,42,0.06);
+  --shadow-2: 0 2px 8px rgba(15,23,42,0.08);
+  --ring: 0 0 0 3px var(--c-focus);
+}
+
+*{ box-sizing: border-box; }
+html,body{ height:100%; }
+
+/* 全体 */
+body{
+  margin: 16px;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP",
+               "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  line-height: 1.6;
+}
+
+/* 見出し */
+h1{
+  margin: 0 0 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+}
+h1::before{
+  content: "";
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff, #ffb47a 35%, #ff7a18 65%, #cc4f00);
+  box-shadow: 0 0 12px rgba(255,122,24,0.65);
+}
+
+/* ツールバー */
+.toolbar{
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin: 10px 0 18px;
+}
+.status{
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--c-muted);
+}
+
+/* 2カラムグリッド */
+.grid{
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 1100px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+/* カード（fieldset相当） */
+fieldset{
+  border: 1px solid var(--c-border);
+  background: var(--c-surface);
+  border-radius: var(--radius);
+  padding: 14px 14px 16px;
+  box-shadow: var(--shadow-2);
+}
+legend{
+  padding: 0 8px;
+  color: var(--c-accent);
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+/* ラベル */
+label{
+  display: inline-block;
+  margin: 6px 0 6px;
+  color: var(--c-text);
+  font-size: 0.95rem;
+}
+
+/* ===== フィールド（1項目=1ブロック） ===== */
+.field{
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field-head{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 22px;
+}
+.field-head label{
+  margin: 0;
+  font-weight: 600;
+}
+.field .note{ margin-top: 0; }
+
+/* row2 / row3 の中に .field を入れたときは下マージンを詰める */
+.row2 > .field,
+.row3 > .field{ margin-bottom: 0; }
+
+/* ファイル選択行（ボタン＋選択状態ラベル） */
+.filerow{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filerow .btn{ flex: 0 0 auto; }
+.filerow input[type="text"]{ flex: 1 1 12em; min-width: 0; }
+
+/* 選択状態ラベル（未選択=グレー / 選択済=緑） */
+.file-label{
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--c-muted);
+  font-size: 0.9rem;
+}
+.file-label.selected{ color: var(--c-ok); font-weight: 600; }
+
+/* ===== 範囲入力（最小 / 最大 / 刻み）をまとめて囲う ===== */
+.range-block{ margin-bottom: 16px; }
+.range-label{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.range-group{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+  border: 1px dashed var(--c-border);
+  border-radius: var(--radius-sm);
+  background: #fafbfc;
+}
+.range-cell{ display: grid; gap: 4px; }
+.range-cell .sub{
+  margin: 0;
+  font-size: 12px;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+@media (max-width: 840px){
+  .range-group{ grid-template-columns: 1fr; }
+}
+
+/* ===== 「i」ボタン（仕様説明） ===== */
+.info-btn{
+  flex: 0 0 auto;
+  width: 18px; height: 18px;
+  line-height: 16px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 12px; font-weight: 700;
+  border: 1px solid var(--c-border);
+  background: #fff;
+  color: var(--c-muted);
+  cursor: pointer;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.info-btn:hover{ border-color: var(--c-accent); color: var(--c-accent); background: #fff7f0; }
+.info-btn:focus-visible{ box-shadow: var(--ring); outline: none; }
+
+/* 仕様説明ポップオーバー */
+.info-pop{
+  position: absolute;
+  max-width: 300px;
+  background: #ffffff;
+  border: 1px solid var(--c-border);
+  border-left: 3px solid var(--c-accent);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-1);
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--c-text);
+  z-index: 1000;
+}
+
+/* ===== 出力する図のチェックボックス群 ===== */
+.fig-grid{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  padding: 8px 0 0 2px;
+}
+.fig-grid label{ margin: 0; display: inline-flex; align-items: center; gap: 6px; }
+
+/* 言語トグル */
+.btn.lang{ font-weight: 600; }
+
+/* 入力・セレクト */
+input[type="text"], input[type="number"], select{
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--c-text);
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+input::placeholder{ color: #9aa4b2; }
+input:focus, select:focus{
+  border-color: var(--c-accent);
+  box-shadow: var(--ring);
+  background: #fff;
+}
+select{
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--c-accent) 50%),
+    linear-gradient(135deg, var(--c-accent) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 22px) calc(1em + 2px),
+    calc(100% - 16px) calc(1em + 2px),
+    100% 0;
+  background-size:
+    6px 6px, 6px 6px, 2.5em 2.5em;
+  background-repeat: no-repeat;
+}
+
+/* 行グリッド */
+.row{  display:grid; grid-template-columns: repeat(4,1fr); gap:10px; }
+.row2{ display:grid; grid-template-columns: repeat(2,1fr); gap:10px; }
+.row3{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; }
+@media (max-width: 840px){
+  .row { grid-template-columns: 1fr 1fr; }
+  .row2, .row3 { grid-template-columns: 1fr; }
+}
+
+/* ボタン */
+.btn{
+  padding: 10px 14px;
+  border: 1px solid #d0d7de;
+  background: #ffffff;
+  color: var(--c-text);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: transform .05s ease, box-shadow .15s ease, border-color .15s, background .2s;
+}
+.btn:hover{ border-color: #c2cbd3; background: #f6f8fa; }
+.btn:active{ transform: translateY(1px); }
+.btn:focus-visible{ box-shadow: var(--ring); }
+
+.btn.primary{
+  background: linear-gradient(180deg, var(--c-accent), #ff6600);
+  border-color: #e85f00;
+  color: #ffffff;
+  font-weight: 700;
+}
+.btn.primary:hover{
+  background: linear-gradient(180deg, var(--c-accent-weak), var(--c-accent));
+}
+
+/* 注釈 */
+.note{ font-size: 12px; color: var(--c-muted); }
+
+/* キャンバス（プレビュー系があれば） */
+canvas{
+  display:block; width:100%; height:480px;
+  border:1px solid var(--c-border);
+  border-radius: var(--radius);
+  background:#ffffff;
+  box-shadow: var(--shadow-1);
+}
+
+/* 等幅 */
+.mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+
+/* 初期は非表示（JSの切替で表示） */
+#msm_file_row, #csv_file_row{ display: none; }
+
+/* 成功／失敗メッセージの色（任意） */
+.status.success{ color: var(--c-ok); }
+.status.warning{ color: var(--c-warn); }
+.status.error  { color: var(--c-err); }
+
+/* ===== Input & Select – high-contrast on white background ===== */
+:root{
+  /* 新しい入力系トークン（必要あればここで色味調整） */
+  --c-input-bg:        #f3f6fa;   /* 通常の入力背景：白と区別がつく薄色 */
+  --c-input-bg-hover:  #eef2f6;   /* ホバー時：わずかに濃く */
+  --c-input-bg-focus:  #ffffff;   /* フォーカス時：白に切り替え＆リング強調 */
+  --c-input-border:    #d7dce2;   /* 境界線 */
+  --c-input-border-h:  #c8cfd7;   /* ホバー境界 */
+  --c-input-placeholder:#9aa4b2;  /* プレースホルダー */
+  --c-input-disabled-bg:#f2f4f7;  /* disabled/readonly の背景 */
+  --c-input-disabled-fg:#94a3b8;  /* disabled/readonly の文字 */
+}
+
+/* 入力・セレクト（通常状態） */
+input[type="text"],
+input[type="number"],
+select{
+  background: var(--c-input-bg);
+  color: var(--c-text);
+  border: 1px solid var(--c-input-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  outline: none;
+  transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+input::placeholder{ color: var(--c-input-placeholder); }
+
+/* ホバー */
+input[type="text"]:hover,
+input[type="number"]:hover,
+select:hover{
+  background: var(--c-input-bg-hover);
+  border-color: var(--c-input-border-h);
+}
+
+/* フォーカス（背景を白にし、アクセント色リングで強調） */
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus{
+  background: var(--c-input-bg-focus);
+  border-color: var(--c-accent);
+  box-shadow: var(--ring);
+}
+
+/* セレクトの矢印（ライト背景に馴染むよう維持） */
+select{
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--c-accent) 50%),
+    linear-gradient(135deg, var(--c-accent) 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 22px) calc(1em + 2px),
+    calc(100% - 16px) calc(1em + 2px),
+    100% 0;
+  background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
+  background-repeat: no-repeat;
+}
+
+/* 無効化・読取専用 */
+input[disabled],
+input[readonly],
+select[disabled]{
+  background: var(--c-input-disabled-bg);
+  color: var(--c-input-disabled-fg);
+  cursor: not-allowed;
+  border-color: var(--c-input-border);
+  box-shadow: none;
+}
+
+/* ===== 動翼空力DB（aero DB）スロット ===== */
+#aero_db_files{ margin-top: 6px; }
+.aero-db-slot{ margin: 6px 0; }
+.aero-slot-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.aero-slot-row .aero-slot-use{ margin: 0; white-space: nowrap; }
+.aero-slot-row .aero-slot-v{
+  margin: 0;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.aero-slot-row .aero-slot-v input{ width: 7em; }
+.aero-slot-row .aero-slot-fn{
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--c-muted);
+  font-size: 0.9rem;
+}
+.aero-slot-row .btn{ flex: 0 0 auto; }
+
+/* エラー表示の例（バリデーションで .is-invalid を付ける場合） */
+.is-invalid{
+  border-color: #e54d2e !important;
+  background: #fff1ee !important;
+}
+.is-invalid:focus{
+  box-shadow: 0 0 0 3px rgba(229,77,46,.25) !important;
+}

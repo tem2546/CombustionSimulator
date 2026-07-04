@@ -1,0 +1,27 @@
+[2025-12-23T18:37:53.408641] open_file -> C:/Spica_v2.1/LaunchSite/大島海/2025大島海.jpg
+[2025-12-23T18:38:13.065004] load_settings not found: C:\Spica_plus_NoOption\Scripts\GeneralSettingUI\dist\Settings\settings.json
+[2025-12-23T20:39:29.942349] load_settings not found: C:\Spica_plus_NoOption\Scripts\GeneralSettingUI\dist\Settings\settings.json
+[2025-12-26T14:31:16.372669] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:31:18.259744] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:31:58.028358] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:19.521356] open_file -> C:/Spica_v2.1/LaunchSite/大島海/2025大島海.jpg
+[2025-12-26T14:32:23.728575] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:27.903241] open_file exception: main thread is not in main loop
+[2025-12-26T14:32:29.600361] open_file exception: main thread is not in main loop
+[2025-12-26T14:32:33.107322] open_file exception: main thread is not in main loop
+[2025-12-26T14:32:33.214271] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:35.543841] open_file exception: main thread is not in main loop
+[2025-12-26T14:32:41.759908] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:43.699816] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:49.087586] open_file exception: main thread is not in main loop
+[2025-12-26T14:32:53.607209] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:54.345283] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:54.960318] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:32:57.131722] open_file exception: main thread is not in main loop
+[2025-12-26T14:43:15.422907] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:43:16.666083] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:54:48.988832] load_settings_from <- C:/Spica_plus_NoOption/Scripts/Settings/settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:55:02.693563] load_settings <- C:\Spica_plus_NoOption\Scripts\Settings\settings.json (keys: ['elev', 'Vw0', 'Wpsi', 'wind_model', 'mode_landing', 't_max', 'dt'])
+[2025-12-26T14:59:00.372222] open_file -> C:/Spica_v2.1/LaunchSite/大島海/2025大島海.jpg
+[2025-12-26T16:47:02.059352] open_file -> C:/Spica_v2.1/LaunchSite/大島海/2025大島海.jpg
+[2025-12-26T16:52:12.399849] open_file -> C:/Spica_v2.1/LaunchSite/大島海/2025大島海.jpg

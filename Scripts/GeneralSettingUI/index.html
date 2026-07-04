@@ -1,0 +1,527 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>General Settings UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+
+  <h1 data-i18n="app.title">全体設定 UI</h1>
+
+  <!-- 上部ツールバー -->
+  <div class="toolbar">
+    <button id="loadBtn" class="btn" data-i18n="toolbar.load">初期値を読み込む</button>
+    <button id="loadPreBtn" class="btn" data-i18n="toolbar.loadPre">前回設定を読み込み</button>
+    <button id="saveBtn" class="btn primary" data-i18n="toolbar.save">現在の設定を保存して終了</button>
+    <button id="saveAsBtn" class="btn" data-i18n="toolbar.saveAs">名前を付けて保存…</button>
+    <button id="openFileBtn" class="btn" data-i18n="toolbar.open">設定ファイルを開く…</button>
+    <button id="langToggle" class="btn lang" type="button">English</button>
+    <span id="msg" class="status mono"></span>
+  </div>
+
+  <!-- 左右２カラム -->
+  <div class="grid">
+
+    <!-- 左カラム：モデル／条件／ロール／オプション -->
+    <div class="left">
+
+      <fieldset>
+        <legend data-i18n="model.legend">機体モデル設定</legend>
+
+        <div id="single_param_row" class="field">
+          <div class="field-head">
+            <label data-i18n="model.param">諸元表ファイル (.xlsx)</label>
+          </div>
+          <div class="filerow">
+            <button id="pickParamBtn" class="btn" data-i18n="model.pickParam">諸元表を選択</button>
+            <span id="param_fn_label" class="file-label">(未選択)</span>
+          </div>
+        </div>
+
+        <div id="multi_param_rows" style="display:none">
+          <div class="field">
+            <div class="field-head">
+              <label data-i18n="model.param1">1段目 諸元表ファイル (.xlsx)</label>
+            </div>
+            <div class="filerow">
+              <button id="pickParam1Btn" class="btn" data-i18n="model.pickParam1">1段目 諸元表を選択</button>
+              <span id="param1_fn_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label data-i18n="model.param2">2段目 分離上部 諸元表ファイル (.xlsx)</label>
+            </div>
+            <div class="filerow">
+              <button id="pickParam2Btn" class="btn" data-i18n="model.pickParam2">2段目(分離上部) 諸元表を選択</button>
+              <span id="param2_fn_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label data-i18n="model.param3">2段目 分離下部 諸元表ファイル (.xlsx)</label>
+            </div>
+            <div class="filerow">
+              <button id="pickParam3Btn" class="btn" data-i18n="model.pickParam3">2段目(分離下部) 諸元表を選択</button>
+              <span id="param3_fn_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label data-i18n="model.thrust">推力履歴データ (.xlsx/.csv/.txt)</label>
+          </div>
+          <div class="filerow">
+            <button id="pickThrustBtn" class="btn" data-i18n="model.pickThrust">推力履歴を選択</button>
+            <span id="thrust_fn_label" class="file-label">(未選択)</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="descent_model" data-i18n="model.descent">降下モデル</label>
+            <button class="info-btn" type="button" data-info="info.descent" aria-label="info">i</button>
+          </div>
+          <select id="descent_model">
+            <option value="Vw_model" data-i18n="model.descent.vw">風速モデル</option>
+            <option value="Dynamics" data-i18n="model.descent.dyn">動力学モデル</option>
+          </select>
+          <span class="note" data-i18n="model.descent.note">降下中の挙動モデルを選択します。</span>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="multi_stage" data-i18n="model.multi">多段設定（最大2段）</label>
+            <button class="info-btn" type="button" data-info="info.multi" aria-label="info">i</button>
+          </div>
+          <select id="multi_stage">
+            <option value="Off" data-i18n="model.multi.off">オフ（単段）</option>
+            <option value="On" data-i18n="model.multi.on">オン（2段式）</option>
+          </select>
+          <span class="note" data-i18n="model.multi.note">ON にすると2段式として諸元表を3ファイル選択します。</span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="cond.legend">打上げ・風・時間設定</legend>
+
+        <div class="range-block">
+          <div class="range-label">
+            <span data-i18n="cond.elev.group">打上げ仰角（射角）[deg]</span>
+            <button class="info-btn" type="button" data-info="info.elev" aria-label="info">i</button>
+          </div>
+          <div class="range-group">
+            <div class="range-cell">
+              <label class="sub" for="elev_min" data-i18n="cond.min">最小</label>
+              <input id="elev_min" type="number" min="0" max="90" step="0.1" />
+            </div>
+            <div class="range-cell">
+              <label class="sub" for="elev_max" data-i18n="cond.max">最大</label>
+              <input id="elev_max" type="number" min="0" max="90" step="0.1" />
+            </div>
+            <div class="range-cell">
+              <label class="sub" for="elev_step" data-i18n="cond.step">刻み</label>
+              <input id="elev_step" type="number" min="0.0001" step="0.1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="range-block">
+          <div class="range-label">
+            <span data-i18n="cond.vw0.group">基準高度風速 Vw0 [m/s]</span>
+            <button class="info-btn" type="button" data-info="info.vw0" aria-label="info">i</button>
+          </div>
+          <div class="range-group">
+            <div class="range-cell">
+              <label class="sub" for="vw0_min" data-i18n="cond.min">最小</label>
+              <input id="vw0_min" type="number" min="0" step="0.1" />
+            </div>
+            <div class="range-cell">
+              <label class="sub" for="vw0_max" data-i18n="cond.max">最大</label>
+              <input id="vw0_max" type="number" min="0" step="0.1" />
+            </div>
+            <div class="range-cell">
+              <label class="sub" for="vw0_step" data-i18n="cond.step">刻み</label>
+              <input id="vw0_step" type="number" min="0.0001" step="0.1" />
+            </div>
+          </div>
+        </div>
+
+        <div class="range-block">
+          <div class="range-label">
+            <span data-i18n="cond.wpsi.group">風向（風が吹いてくる方位）[deg]</span>
+            <button class="info-btn" type="button" data-info="info.wpsi" aria-label="info">i</button>
+          </div>
+          <div class="range-group">
+            <div class="range-cell">
+              <label class="sub" for="wpsi_min" data-i18n="cond.min">最小</label>
+              <input id="wpsi_min" type="number" min="0" max="360" step="0.1" />
+            </div>
+            <div class="range-cell">
+              <label class="sub" for="wpsi_max" data-i18n="cond.max">最大</label>
+              <input id="wpsi_max" type="number" min="0" max="360" step="0.1" />
+            </div>
+            <div class="range-cell">
+              <label class="sub" for="wpsi_step" data-i18n="cond.step">刻み</label>
+              <input id="wpsi_step" type="number" min="0.0001" step="0.1" />
+            </div>
+          </div>
+        </div>
+        <div class="note" data-i18n="cond.set.note">単一条件で計算する場合は「最小=最大, 刻み=1」としてください。</div>
+
+        <div class="field">
+          <div class="field-head">
+            <label data-i18n="cond.fp">落下分散図 設定ファイル</label>
+            <button class="info-btn" type="button" data-info="info.fp" aria-label="info">i</button>
+          </div>
+          <div class="filerow">
+            <button id="pickFPBtn" class="btn" data-i18n="cond.pickFP">落下分散図設定を選択</button>
+            <span id="fp_fn_label" class="file-label">(未選択)</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="wind_model" data-i18n="cond.wind">風モデル</label>
+            <button class="info-btn" type="button" data-info="info.wind" aria-label="info">i</button>
+          </div>
+          <select id="wind_model">
+            <option value="PowerLaw" data-i18n="cond.wind.powerlaw">べき乗則</option>
+            <option value="MSM" data-i18n="cond.wind.msm">MSM（気象データ）</option>
+            <option value="csv" data-i18n="cond.wind.csv">CSV（風速プロファイル）</option>
+          </select>
+          <span class="note" data-i18n="cond.wind.note">MSM / CSV を選んだ場合は下の欄でファイルを指定します。</span>
+        </div>
+
+        <div id="msm_file_row" class="field">
+          <div class="field-head">
+            <label data-i18n="cond.msm">MSM 気象データ (.nc)</label>
+          </div>
+          <div class="filerow">
+            <button id="pickMsmBtn" class="btn" data-i18n="cond.pickMsm">MSMファイルを選択</button>
+            <span id="msm_fn_label" class="file-label">(未選択)</span>
+          </div>
+        </div>
+
+        <div id="csv_file_row" class="field">
+          <div class="field-head">
+            <label data-i18n="cond.windcsv">風速プロファイル CSV (.xlsx/.csv)</label>
+          </div>
+          <div class="filerow">
+            <button id="pickCsvBtn" class="btn" data-i18n="cond.pickCsv">CSVファイルを選択</button>
+            <span id="windcsv_fn_label" class="file-label">(未選択)</span>
+          </div>
+        </div>
+
+        <div class="row3">
+          <div class="field">
+            <div class="field-head">
+              <label for="base_azm" data-i18n="cond.base">方位の基準</label>
+              <button class="info-btn" type="button" data-info="info.base" aria-label="info">i</button>
+            </div>
+            <select id="base_azm">
+              <option value="ME" data-i18n="cond.base.ME">磁方位・東 (ME)</option>
+              <option value="MN" data-i18n="cond.base.MN">磁方位・北 (MN)</option>
+              <option value="MS" data-i18n="cond.base.MS">磁方位・南 (MS)</option>
+              <option value="MW" data-i18n="cond.base.MW">磁方位・西 (MW)</option>
+              <option value="TE" data-i18n="cond.base.TE">真方位・東 (TE)</option>
+              <option value="TN" data-i18n="cond.base.TN">真方位・北 (TN)</option>
+              <option value="TS" data-i18n="cond.base.TS">真方位・南 (TS)</option>
+              <option value="TW" data-i18n="cond.base.TW">真方位・西 (TW)</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="mode_angle" data-i18n="cond.angle">角度の回転方向</label>
+              <button class="info-btn" type="button" data-info="info.angle" aria-label="info">i</button>
+            </div>
+            <select id="mode_angle">
+              <option value="CW" data-i18n="cond.angle.cw">時計回り (CW)</option>
+              <option value="CCW" data-i18n="cond.angle.ccw">反時計回り (CCW)</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="t_max" data-i18n="cond.tmax">最大計算時間 t_max [s]</label>
+              <button class="info-btn" type="button" data-info="info.tmax" aria-label="info">i</button>
+            </div>
+            <input id="t_max" type="number" step="1" min="1" />
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <div class="field-head">
+              <label for="rate_hz" data-i18n="cond.rate">計算レート（積分周波数）[Hz]</label>
+              <button class="info-btn" type="button" data-info="info.rate" aria-label="info">i</button>
+            </div>
+            <input id="rate_hz" type="number" min="1" step="1" />
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="mode_landing" data-i18n="cond.landing">着地モード</label>
+              <button class="info-btn" type="button" data-info="info.landing" aria-label="info">i</button>
+            </div>
+            <select id="mode_landing">
+              <option value="Hard" data-i18n="cond.landing.hard">弾道（着弾）</option>
+              <option value="Descent" data-i18n="cond.landing.descent">開傘降下</option>
+              <option value="Both" data-i18n="cond.landing.both">両方</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="roll.legend">ロール制御設定</legend>
+
+        <div class="row2">
+          <div class="field">
+            <div class="field-head">
+              <label for="execute_cont" data-i18n="roll.exec">ロール制御の実行</label>
+            </div>
+            <select id="execute_cont">
+              <option value="true" data-i18n="roll.exec.on">実行する</option>
+              <option value="false" data-i18n="roll.exec.off">実行しない</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="control_func" data-i18n="roll.func">制御関数名</label>
+              <button class="info-btn" type="button" data-info="info.control_func" aria-label="info">i</button>
+            </div>
+            <input id="control_func" type="text" placeholder="example" />
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="simu_mode" data-i18n="roll.simu">シミュレーションモード</label>
+            <button class="info-btn" type="button" data-info="info.simu" aria-label="info">i</button>
+          </div>
+          <select id="simu_mode">
+            <option value="Launch" data-i18n="roll.simu.launch">打上げ</option>
+            <option value="Rotational" data-i18n="roll.simu.rot">定常回転（姿勢一定）</option>
+          </select>
+        </div>
+
+        <div id="rot_cond_row" class="row2">
+          <div class="field">
+            <div class="field-head">
+              <label for="rot_Va" data-i18n="roll.va">対気速度（定常回転時）Va [m/s]</label>
+            </div>
+            <input id="rot_Va" type="number" step="0.1" />
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="rot_z" data-i18n="roll.z">高度（定常回転時）z [m]</label>
+            </div>
+            <input id="rot_z" type="number" step="0.1" />
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <div class="field-head">
+              <label for="roll_factor" data-i18n="roll.factor">ロールモーメントの指定方法</label>
+              <button class="info-btn" type="button" data-info="info.factor" aria-label="info">i</button>
+            </div>
+            <select id="roll_factor">
+              <option value="Coefficience" data-i18n="roll.factor.coef">ロール空力係数</option>
+              <option value="Moment" data-i18n="roll.factor.moment">モーメント履歴 CSV</option>
+            </select>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="Cl0" data-i18n="roll.cl0">ロール空力係数 Cl0</label>
+              <button class="info-btn" type="button" data-info="info.cl0" aria-label="info">i</button>
+            </div>
+            <input id="Cl0" type="number" step="0.0001" />
+          </div>
+        </div>
+
+        <div id="mx_file_row" class="field">
+          <div class="field-head">
+            <label data-i18n="roll.mx">ロールモーメント履歴データ (.xlsx/.csv)</label>
+          </div>
+          <div class="filerow">
+            <input id="mx_fn" type="text" placeholder="未選択" />
+            <button id="pickMxBtn" class="btn" data-i18n="roll.pickMx">選択</button>
+          </div>
+        </div>
+
+        <!-- ===== 動翼空力データベース（aero DB） ===== -->
+        <div id="aero_db_row" class="field">
+          <div class="field-head">
+            <label for="aero_db_use" data-i18n="roll.aero">動翼空力データベース (aero DB)</label>
+            <button class="info-btn" type="button" data-info="info.aero" aria-label="info">i</button>
+          </div>
+          <select id="aero_db_use">
+            <option value="false" data-i18n="roll.aero.off">使用しない</option>
+            <option value="true" data-i18n="roll.aero.on">使用する</option>
+          </select>
+          <span class="note" data-i18n="roll.aero.note">ON: 最大5個のDBファイルを解析流速ごとに登録（「使用」は2個以上必須・流速は互いに異なる正値）。</span>
+        </div>
+
+        <div id="aero_db_files">
+          <div class="aero-db-slot">
+            <div class="aero-slot-row">
+              <label class="aero-slot-use"><input type="checkbox" id="aero_use_0"> <span data-i18n="roll.aero.use">使用</span></label>
+              <label class="aero-slot-v"><span data-i18n="roll.aero.v">解析流速 v [m/s]</span> <input id="aero_v_0" type="number" min="0.0001" step="1" placeholder="20" /></label>
+              <span id="aero_fn_label_0" class="aero-slot-fn">(未選択)</span>
+              <button id="pickAero0Btn" class="btn" data-i18n="roll.pickAero1">DB#1 を選択</button>
+            </div>
+          </div>
+          <div class="aero-db-slot">
+            <div class="aero-slot-row">
+              <label class="aero-slot-use"><input type="checkbox" id="aero_use_1"> <span data-i18n="roll.aero.use">使用</span></label>
+              <label class="aero-slot-v"><span data-i18n="roll.aero.v">解析流速 v [m/s]</span> <input id="aero_v_1" type="number" min="0.0001" step="1" placeholder="100" /></label>
+              <span id="aero_fn_label_1" class="aero-slot-fn">(未選択)</span>
+              <button id="pickAero1Btn" class="btn" data-i18n="roll.pickAero2">DB#2 を選択</button>
+            </div>
+          </div>
+          <div class="aero-db-slot">
+            <div class="aero-slot-row">
+              <label class="aero-slot-use"><input type="checkbox" id="aero_use_2"> <span data-i18n="roll.aero.use">使用</span></label>
+              <label class="aero-slot-v"><span data-i18n="roll.aero.v">解析流速 v [m/s]</span> <input id="aero_v_2" type="number" min="0.0001" step="1" /></label>
+              <span id="aero_fn_label_2" class="aero-slot-fn">(未選択)</span>
+              <button id="pickAero2Btn" class="btn" data-i18n="roll.pickAero3">DB#3 を選択</button>
+            </div>
+          </div>
+          <div class="aero-db-slot">
+            <div class="aero-slot-row">
+              <label class="aero-slot-use"><input type="checkbox" id="aero_use_3"> <span data-i18n="roll.aero.use">使用</span></label>
+              <label class="aero-slot-v"><span data-i18n="roll.aero.v">解析流速 v [m/s]</span> <input id="aero_v_3" type="number" min="0.0001" step="1" /></label>
+              <span id="aero_fn_label_3" class="aero-slot-fn">(未選択)</span>
+              <button id="pickAero3Btn" class="btn" data-i18n="roll.pickAero4">DB#4 を選択</button>
+            </div>
+          </div>
+          <div class="aero-db-slot">
+            <div class="aero-slot-row">
+              <label class="aero-slot-use"><input type="checkbox" id="aero_use_4"> <span data-i18n="roll.aero.use">使用</span></label>
+              <label class="aero-slot-v"><span data-i18n="roll.aero.v">解析流速 v [m/s]</span> <input id="aero_v_4" type="number" min="0.0001" step="1" /></label>
+              <span id="aero_fn_label_4" class="aero-slot-fn">(未選択)</span>
+              <button id="pickAero4Btn" class="btn" data-i18n="roll.pickAero5">DB#5 を選択</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== パーツ別空力寄与モード（Method B） ===== -->
+        <div id="comp_aero_row" class="field">
+          <div class="field-head">
+            <label for="comp_aero_use" data-i18n="roll.comp">パーツ別空力寄与モード (実効舵角)</label>
+            <button class="info-btn" type="button" data-info="info.comp" aria-label="info">i</button>
+          </div>
+          <select id="comp_aero_use">
+            <option value="false" data-i18n="roll.comp.off">使用しない</option>
+            <option value="true" data-i18n="roll.comp.on">使用する</option>
+          </select>
+          <span class="note" data-i18n="roll.comp.note">ON: 各部品の CN_α・X_cp・取付角を記した Excel(Components シート)を読み込み、動翼の実効迎角 α+δ をピッチ/ヨーに反映します。</span>
+        </div>
+
+        <div id="comp_aero_files">
+          <div class="field">
+            <div class="field-head">
+              <label data-i18n="roll.comp.file">パーツ別空力データ (.xlsx)</label>
+            </div>
+            <div class="filerow">
+              <input id="comp_aero_fn" type="text" placeholder="未選択" readonly />
+              <button id="pickCompAeroBtn" class="btn" data-i18n="roll.comp.pick">選択</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label for="comp_fix_delta_use" data-i18n="roll.comp.fix">固定舵角モード</label>
+              <button class="info-btn" type="button" data-info="info.comp.fix" aria-label="info">i</button>
+            </div>
+            <select id="comp_fix_delta_use">
+              <option value="false" data-i18n="roll.comp.fix.off">使用しない</option>
+              <option value="true" data-i18n="roll.comp.fix.on">使用する</option>
+            </select>
+            <span class="note" data-i18n="roll.comp.fix.note">ON: 制御関数なしで全動翼を δ_fixed に固定（制御関数を併用する場合は制御舵角 δ_a と重畳）。</span>
+          </div>
+
+          <div id="comp_delta_row" class="field">
+            <div class="field-head">
+              <label for="comp_delta_fixed" data-i18n="roll.comp.delta">固定動翼角 δ_fixed [deg]</label>
+            </div>
+            <input id="comp_delta_fixed" type="number" step="0.1" placeholder="15" />
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="option.legend">オプション設定</legend>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="parallel" data-i18n="option.parallel">並列計算</label>
+          </div>
+          <select id="parallel">
+            <option value="Yes" data-i18n="option.parallel.yes">有効</option>
+            <option value="No" data-i18n="option.parallel.no">無効</option>
+          </select>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend data-i18n="output.legend">出力設定</legend>
+
+        <div id="modeExportRow" class="field">
+          <div class="field-head">
+            <label for="mode_export" data-i18n="output.modeExport">出力先モード</label>
+          </div>
+          <select id="mode_export">
+            <option value="Default" data-i18n="output.modeExport.default">自動</option>
+            <option value="Manual" data-i18n="output.modeExport.manual">手動指定</option>
+          </select>
+        </div>
+
+        <div id="resultDirRow" class="field" style="display:none">
+          <div class="filerow">
+            <button id="pickResultDirBtn" class="btn" data-i18n="output.pickResultDir">出力先を選択…</button>
+            <span id="result_path_label" class="file-label">(未選択)</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label for="output" data-i18n="output.data">出力データ種別</label>
+            <button class="info-btn" type="button" data-info="info.output" aria-label="info">i</button>
+          </div>
+          <select id="output">
+            <option value="None" data-i18n="output.data.none">なし</option>
+            <option value="vs-time_Logs" data-i18n="output.data.timelog">時系列ログ (vs-time)</option>
+            <option value="FeatureValues" data-i18n="output.data.feature">特徴値 (FeatureValues)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <div class="field-head">
+            <label data-i18n="output.figs">出力する図</label>
+          </div>
+          <span class="note" data-i18n="output.figs.note">出力する図・ファイルを選択してください。</span>
+          <div id="figSelectRow" class="fig-grid">
+            <label><input type="checkbox" class="fig-check" value="FlightPath" id="fig_FlightPath"> <span data-i18n="output.fig.flightpath">飛行経路図 (JPG)</span></label>
+            <label><input type="checkbox" class="fig-check" value="KML of FlightPath" id="fig_KML_FlightPath"> <span data-i18n="output.fig.kmlflight">飛行経路 KML</span></label>
+            <label><input type="checkbox" class="fig-check" value="FallPoint" id="fig_FallPoint"> <span data-i18n="output.fig.fallpoint">落下分散図 (JPG)</span></label>
+            <label><input type="checkbox" class="fig-check" value="KML of FallPoint" id="fig_KML_FallPoint"> <span data-i18n="output.fig.kmlfall">落下分散 KML</span></label>
+            <label><input type="checkbox" class="fig-check" value="Attitude MP4" id="fig_AttitudeMP4"> <span data-i18n="output.fig.mp4">姿勢変化 MP4</span></label>
+            <label><input type="checkbox" class="fig-check" value="Wind Graph" id="fig_WindGraph"> <span data-i18n="output.fig.wind">風プロファイル図 (JPG)</span></label>
+            <label><input type="checkbox" class="fig-check" value="Wind CSV" id="fig_WindCSV"> <span data-i18n="output.fig.windcsv">上空風モデル CSV (PowerLaw時のみ)</span></label>
+          </div>
+        </div>
+
+      </fieldset>
+
+    </div>
+  </div>
+
+  <!-- スクリプト読み込み（ビルド方法に応じてパスを調整） -->
+  <script type="module" src="./js/app.js" defer></script>
+</body>
+</html>
