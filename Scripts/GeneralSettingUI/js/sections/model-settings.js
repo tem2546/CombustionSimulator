@@ -81,6 +81,7 @@ export class ModelSettings {
     setVal("noiseremoved", s.noiseremoved || "No");
     setVal("spikecut",     s.spikecut     || "No");
     setVal("csvout",       s.csvout       || "Yes");
+    setVal("calc_residual_time", s.residual_time || "Yes");
   }
 
   collectPayload() {
@@ -90,7 +91,8 @@ export class ModelSettings {
       thrust:       { fn: s.thrust?.fn ?? "", path: s.thrust?.path ?? "" },
       noiseremoved: byId("noiseremoved")?.value || "No",
       spikecut:     byId("spikecut")?.value || "No",
-      csvout:       byId("csvout")?.value || "Yes"
+      csvout:       byId("csvout")?.value || "Yes",
+      residual_time: byId("calc_residual_time")?.value || "Yes",
     };
   }
 

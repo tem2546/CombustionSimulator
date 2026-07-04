@@ -6,6 +6,7 @@ import { CondSettings } from "./sections/cond-settings.js";
 import { RollSettings } from "./sections/roll-settings.js";
 import { OutputSettings } from "./sections/output-settings.js";
 import { initLang, toggleLang } from "./core/i18n.js";
+import { Mode2Settings } from "./sections/mode2-settings.js";
 
 const FILE_KEYS = ["thrust"];
 
@@ -14,6 +15,7 @@ const model  = new ModelSettings();
 const cond   = new CondSettings();
 const roll   = new RollSettings();
 const output = new OutputSettings();
+const mode2  = new Mode2Settings();
 
 function sanitizeFileFields(data) {
   const cleaned = { ...data };
@@ -35,7 +37,7 @@ function safeCheckValidity(sec, payload) {
 
 function refreshAllSectionUi() {
   requestAnimationFrame(() => {
-    const sections = [model, cond, roll, output];
+    const sections = [model, mode2, cond, roll, output];
     for (const sec of sections) {
       safeApplyDefaults(sec);
     }
@@ -63,7 +65,7 @@ async function bootstrap() {
   await whenPywebviewReady();
 
   // 2. 各セクションの初期化処理
-  const sections = [model, cond, roll, output];
+  const sections = [model, mode2, cond, roll, output];
   for (const sec of sections) {
     if (typeof sec?.init === "function") sec.init(store);
   }
@@ -127,11 +129,13 @@ async function bootstrap() {
   byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
     const payload = { 
       ...safeCollectPayload(model),
+      ...safeCollectPayload(mode2),
       ...safeCollectPayload(output)
     };
     
     const errs = [
       ...safeCheckValidity(model, payload),
+      ...safeCheckValidity(mode2, payload),
       ...safeCheckValidity(output, payload)
     ];
 
@@ -149,11 +153,13 @@ async function bootstrap() {
   byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
     const payload = { 
       ...safeCollectPayload(model),
+      ...safeCollectPayload(mode2),
       ...safeCollectPayload(output)
     };
     
     const errs = [
       ...safeCheckValidity(model, payload),
+      ...safeCheckValidity(mode2, payload),
       ...safeCheckValidity(output, payload)
     ];
 

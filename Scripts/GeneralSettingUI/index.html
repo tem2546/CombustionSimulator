@@ -89,14 +89,91 @@
             <span class="note">処理したデータを「Output」フォルダにCSV形式で書き出すか選択します。</span>
           </div>
 
+          <div class="field">
+            <div class="field-head">
+              <label>燃料残留時間の算出</label>
+            </div>
+            <div class="filerow">
+              <select id="calc_residual_time" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
+                <option value="Yes">計算する (Yes)</option>
+                <option value="No">計算しない (No)</option>
+              </select>
+            </div>
+          </div>
+
         </fieldset>
       </div>
 
       <!-- データ比較モード -->
-      <div id="panel_mode2" class="mode-panel" style="display:none;">
+      <div id="panel_mode2" style="display:none">
         <fieldset>
-          <legend>2. データ比較 モード</legend>
-          <p>ここに複数データの比較設定を後で入れます。</p>
+          <legend>データ比較設定 (Mode 2)</legend>
+
+          <!-- 比較データ数 -->
+          <div class="field">
+            <div class="field-head">
+              <label>比較するデータ数</label>
+            </div>
+            <div class="filerow">
+              <select id="compareDataNumSelect" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
+                <option value="2">2機</option>
+                <option value="3">3機</option>
+                <option value="custom">その他 (手動入力)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- データ数入力 -->
+          <div id="custom_datanum_row" class="field" style="display:none">
+            <div class="field-head">
+              <label>データ数を直接入力</label>
+            </div>
+            <div class="filerow">
+              <input type="number" id="customDataNumInput" class="input-control" min="2" value="4" style="width: 100%; padding: 4px; border-radius: 4px;">
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>推力・燃焼室圧スパイクの同期</label>
+            </div>
+            <div class="filerow">
+              <select id="compare_sync_spike" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
+                <option value="No">修正しない (No)</option>
+                <option value="Yes">ズレがある場合は修正する (Yes)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 出力するグラフ -->
+          <div class="field">
+            <div class="field-head">
+              <label>比較出力するグラフ（複数選択可）</label>
+            </div>
+            <div class="filerow" style="flex-direction: column; align-items: flex-start; gap: 6px; padding-left: 4px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="compare_graph_thrust" checked> <span>推力 (thrust)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="compare_graph_removed"> <span>ノイズ除去後推力 (removed_thrust)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 比較データファイル -->
+          <div class="field">
+            <div class="field-head">
+              <label>比較対象データファイル (.xlsx)</label>
+            </div>
+            <div class="filerow" style="gap: 10px; align-items: flex-start; flex-direction: column;">
+              <div style="display: flex; gap: 8px; width: 100%;">
+                <button id="pickCompareFilesBtn" class="btn" style="flex: 1;">対象ファイルを順に選択</button>
+                <button id="clearCompareFilesBtn" class="btn btn-danger" style="background-color: #dc3545; color: white;">リセット</button>
+              </div>
+              <div id="compare_files_list" style="width: 100%; font-size: 0.9em; line-height: 1.6; margin-top: 5px;">
+                </div>
+            </div>
+          </div>
         </fieldset>
       </div>
 
@@ -149,6 +226,7 @@
           </div>
 
         </fieldset>
+        <div style="height: 60px; clear: both;"></div>
       </div>
 
   
