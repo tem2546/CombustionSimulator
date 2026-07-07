@@ -107,7 +107,7 @@
       <!-- データ比較モード -->
       <div id="panel_mode2" style="display:none">
         <fieldset>
-          <legend>データ比較設定 (Mode 2)</legend>
+          <legend>データ比較モード</legend>
 
           <!-- 比較データ数 -->
           <div class="field">
@@ -133,14 +133,15 @@
             </div>
           </div>
 
+          <!-- 推力、燃焼室圧スパイクの同期 -->
           <div class="field">
             <div class="field-head">
               <label>推力・燃焼室圧スパイクの同期</label>
             </div>
             <div class="filerow">
               <select id="compare_sync_spike" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
-                <option value="No">修正しない (No)</option>
                 <option value="Yes">ズレがある場合は修正する (Yes)</option>
+                <option value="No">修正しない (No)</option>
               </select>
             </div>
           </div>
@@ -166,14 +167,14 @@
               <label>比較対象データファイル (.xlsx)</label>
             </div>
             <div class="filerow" style="gap: 10px; align-items: flex-start; flex-direction: column;">
-              <div style="display: flex; gap: 8px; width: 100%;">
-                <button id="pickCompareFilesBtn" class="btn" style="flex: 1;">対象ファイルを順に選択</button>
-                <button id="clearCompareFilesBtn" class="btn btn-danger" style="background-color: #dc3545; color: white;">リセット</button>
+              
+              <div style="text-align: left; width: 100%;">
+                <button id="clearCompareFilesBtn" class="btn btn-danger" style="background-color: #dc3545; color: white;">全選択をクリア</button>
               </div>
-              <div id="compare_files_list" style="width: 100%; font-size: 0.9em; line-height: 1.6; margin-top: 5px;">
-                </div>
+
+              <div id="compare_dynamic_grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; width: 100%; margin-top: 5px;"></div>
+
             </div>
-          </div>
         </fieldset>
       </div>
 
@@ -201,6 +202,7 @@
         </fieldset>
       </div>
 
+      <!-- すべてのモードの共通部分 -->
       <div id="panel_output" class="common-panel" style="margin-top: 25px;">
         <fieldset style="border: 1px solid #1a7f37; border-radius: 6px;">
           <legend style="color: #1a7f37; font-weight: bold; padding: 0 8px;">出力設定</legend>
