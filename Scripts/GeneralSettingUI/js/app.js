@@ -7,9 +7,6 @@ import { RollSettings } from "./sections/roll-settings.js";
 import { OutputSettings } from "./sections/output-settings.js";
 import { initLang, toggleLang } from "./core/i18n.js";
 import { Mode2Settings } from "./sections/mode2-settings.js";
-import { Mode3Settings } from "./sections/mode3-settings.js";
-import { Mode4Settings } from "./sections/mode4-settings.js";
-import { Mode5Settings } from "./sections/mode5-settings.js";
 
 const FILE_KEYS = ["thrust"];
 
@@ -19,9 +16,6 @@ const cond   = new CondSettings();
 const roll   = new RollSettings();
 const output = new OutputSettings();
 const mode2  = new Mode2Settings();
-const mode3  = new Mode3Settings();
-const mode4  = new Mode4Settings();
-const mode5  = new Mode5Settings();
 
 function sanitizeFileFields(data) {
   const cleaned = { ...data };
@@ -136,18 +130,12 @@ async function bootstrap() {
     const payload = { 
       ...safeCollectPayload(model),
       ...safeCollectPayload(mode2),
-      ...safeCollectPayload(mode3),
-      ...safeCollectPayload(mode4),
-      ...safeCollectPayload(mode5),
       ...safeCollectPayload(output)
     };
     
     const errs = [
       ...safeCheckValidity(model, payload),
       ...safeCheckValidity(mode2, payload),
-      ...safeCheckValidity(mode3, payload),
-      ...safeCheckValidity(mode4, payload),
-      ...safeCheckValidity(mode5, payload),
       ...safeCheckValidity(output, payload)
     ];
 
