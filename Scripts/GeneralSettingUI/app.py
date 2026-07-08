@@ -230,6 +230,36 @@ class API:
         except Exception as e:
             log(f'import_image_to_public exception: {e}')
             return {'ok': False, 'error': str(e)}
+    
+    # ---- モード4（自作エンジン解析）の設定を保存する ----
+    def save_mode4_settings(self, payload):
+        try:
+            dst = os.path.join(SETTINGS_DIR, 'mode4_settings.json')
+            with open(dst, 'w', encoding='utf-8') as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+            log(f'save_mode4_settings -> {dst}')
+            self.last_action = True
+            if self.window is not None:
+                self.window.destroy()
+            return {'ok': True}
+        except Exception as e:
+            log(f'save_mode4_settings exception: {e}')
+            return {'ok': False, 'error': str(e)}
+
+    # ---- モード5（エンジンパラメータ設計）の設定を保存する ----
+    def save_mode5_settings(self, payload):
+        try:
+            dst = os.path.join(SETTINGS_DIR, 'mode5_settings.json')
+            with open(dst, 'w', encoding='utf-8') as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+            log(f'save_mode5_settings -> {dst}')
+            self.last_action = True
+            if self.window is not None:
+                self.window.destroy()
+            return {'ok': True}
+        except Exception as e:
+            log(f'save_mode5_settings exception: {e}')
+            return {'ok': False, 'error': str(e)}
 
 def main():
 

@@ -6,6 +6,7 @@
   <title>General Settings UI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./assets/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
 
@@ -94,7 +95,7 @@
               <label>燃料残留時間の算出</label>
             </div>
             <div class="filerow">
-              <select id="calc_residual_time" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
+              <select id="calc_residual_time">
                 <option value="Yes">計算する (Yes)</option>
                 <option value="No">計算しない (No)</option>
               </select>
@@ -115,7 +116,7 @@
               <label>比較するデータ数</label>
             </div>
             <div class="filerow">
-              <select id="compareDataNumSelect" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
+              <select id="compareDataNumSelect">
                 <option value="2">2機</option>
                 <option value="3">3機</option>
                 <option value="custom">その他 (手動入力)</option>
@@ -129,7 +130,7 @@
               <label>データ数を直接入力</label>
             </div>
             <div class="filerow">
-              <input type="number" id="customDataNumInput" class="input-control" min="2" value="4" style="width: 100%; padding: 4px; border-radius: 4px;">
+              <input type="number" id="customDataNumInput">
             </div>
           </div>
 
@@ -139,7 +140,7 @@
               <label>推力・燃焼室圧スパイクの同期</label>
             </div>
             <div class="filerow">
-              <select id="compare_sync_spike" class="select-control" style="width: 100%; padding: 4px; border-radius: 4px;">
+              <select id="compare_sync_spike">
                 <option value="Yes">ズレがある場合は修正する (Yes)</option>
                 <option value="No">修正しない (No)</option>
               </select>
@@ -182,7 +183,40 @@
       <div id="panel_mode3" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>3. CEA_GUI モード</legend>
-          <p>ここにCEA用のパラメータ入力を後で入れます。</p>
+          <div class="cea-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+            <div>
+              <label for="cea_fuel">燃料:</label>
+              <input type="text" id="cea_fuel" value="PP" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_oxid">酸化剤:</label>
+              <input type="text" id="cea_oxid" value="N2O" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_h">h, kj/mol: 生成エンタルピー</label>
+              <input type="number" id="cea_h" value="-713.01204" step="any" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_c">C: 分子内の炭素原子の数</label>
+              <input type="number" id="cea_c" value="30" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_o">O: 分子内の酸素原子の数</label>
+              <input type="number" id="cea_o" value="0" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_h_atom">H: 分子内の水素原子の数</label>
+              <input type="number" id="cea_h_atom" value="60" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_n">N: 分子内の窒素原子の数</label>
+              <input type="number" id="cea_n" value="0" style="width: 100%;">
+            </div>
+            <div>
+              <label for="cea_t">t, k: 初期温度, 単位 k</label>
+              <input type="number" id="cea_t" value="297" style="width: 100%;">
+            </div>
+          </div>
         </fieldset>
       </div>
 
@@ -190,7 +224,38 @@
       <div id="panel_mode4" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>4. 自作エンジン解析 モード</legend>
-          <p>ここにSUBARU解析用の変数を後で入れます。</p>
+          <div class="analysis-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+            <div>
+              <label for="engine_select" style="display: block; font-weight: bold; margin-bottom: 5px;">① 解析するエンジン:</label>
+              <select id="engine_select">
+                <option value="EngineA">EngineA</option>
+                <option value="EngineB">EngineB</option>
+                </select>
+            </div>
+
+            <div>
+              <label for="thrust_file_select" style="display: block; font-weight: bold; margin-bottom: 5px;">② 推力データファイル (.xlsx):</label>
+              <select id="thrust_file_select">
+                <option value="">-- ファイルを選択してください --</option>
+                </select>
+            </div>
+
+            <div>
+              <label for="oxidant_select" style="display: block; font-weight: bold; margin-bottom: 5px;">③ 酸化剤:</label>
+              <select id="oxidant_select">
+                <option value="N2O">N2O (亜酸化窒素)</option>
+                <option value="LOX">LOX (液体酸素)</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="fuel_select" style="display: block; font-weight: bold; margin-bottom: 5px;">④ 燃料:</label>
+              <select id="fuel_select">
+                <option value="PP">PP (ポリプロピレン)</option>
+                <option value="PE">PE (ポリエチレン)</option>
+              </select>
+            </div>
+          </div>
         </fieldset>
       </div>
 
@@ -198,7 +263,82 @@
       <div id="panel_mode5" class="mode-panel" style="display:none;">
         <fieldset>
           <legend>5. エンジンパラメータ設計 モード</legend>
-          <p>ここに初期スロート径などの設計変数を後で入れます。</p>
+          <div class="design-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+            
+            <div class="design-left-col" style="background: #fdfdfd; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">
+              <h4 style="margin-top: 0; color: #444; border-bottom: 2px solid #bbb; padding-bottom: 3px;">① 要求仕様 & 推進薬設定</h4>
+              
+              <div style="margin-bottom: 10px;">
+                <label style="display:block; font-weight:bold; font-size:0.9em;">酸化剤選択:</label>
+                <select id="m5_oxidant_select">
+                  <option value="N2O">N2O (亜酸化窒素)</option>
+                  <option value="LOX">LOX (液体酸素)</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <label style="display:block; font-weight:bold; font-size:0.9em;">燃料選択:</label>
+                <select id="m5_fuel_select">
+                  <option value="PP">PP (ポリプロピレン)</option>
+                  <option value="PE">PE (ポリエチレン)</option>
+                </select>
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <label for="m5_F_req" style="display:block; font-weight:bold; font-size:0.9em;">要求推力 \(F_{\text{req}}\) [N]:</label>
+                <input type="number" id="m5_F_req" value="250">
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <label for="m5_I_req" style="display:block; font-weight:bold; font-size:0.9em;">要求トータルインパルス \(I_{\text{req}}\) [Ns]:</label>
+                <input type="number" id="m5_I_req" value="1500">
+              </div>
+
+              <div style="margin-bottom: 10px;">
+                <label for="m5_vt" style="display:block; font-weight:bold; font-size:0.9em;">タンク容積 \(V_\text{t}\) [cc]:</label>
+                <input type="number" id="m5_vt" value="2000">
+              </div>
+            </div>
+
+            <div class="design-right-col" style="background: #fbfdff; padding: 10px; border-radius: 4px; border: 1px solid #bce0ff;">
+              <h4 style="margin-top: 0; color: #004494; border-bottom: 2px solid #9ecfff; padding-bottom: 3px;">② 供給系・幾何学パラメータ</h4>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                  <label for="m5_pti" style="display:block; font-weight:bold; font-size:0.85em;">初期タンク圧 \(P_{\text{t,init}}\) [MPa]:</label>
+                  <input type="number" id="m5_pti" value="5.0" step="0.1">
+                </div>
+                <div>
+                  <label for="m5_cstar_eff" style="display:block; font-weight:bold; font-size:0.85em;">特性排気速度効率 \(c^*\):</label>
+                  <input type="number" id="m5_cstar_eff" value="0.85" step="0.01">
+                </div>
+                <div>
+                  <label for="m5_Cd" style="display:block; font-weight:bold; font-size:0.85em;">オリフィス流量係数 \(C_\text{d}\):</label>
+                  <input type="number" id="m5_Cd" value="0.7" step="0.01">
+                </div>
+                <div>
+                  <label for="m5_do" style="display:block; font-weight:bold; font-size:0.85em;">オリフィス径 \(d_\text{o}\) [mm]:</label>
+                  <input type="number" id="m5_do" value="3.5" step="0.1">
+                </div>
+                <div>
+                  <label for="m5_df" style="display:block; font-weight:bold; font-size:0.85em;">初期ポート径 \(d_{\text{f,init}}\) [mm]:</label>
+                  <input type="number" id="m5_df" value="15">
+                </div>
+                <div>
+                  <label for="m5_Df_outer" style="display:block; font-weight:bold; font-size:0.85em;">燃料外径 \(D_\text{f}\) [mm]:</label>
+                  <input type="number" id="m5_Df_outer" value="50">
+                </div>
+                <div>
+                  <label for="m5_Lf_max" style="display:block; font-weight:bold; font-size:0.85em;">最大燃料長さ \(L_{\text{f,max}}\) [m]:</label>
+                  <input type="number" id="m5_Lf_max" value="0.5" step="0.05">
+                </div>
+                <div>
+                  <label for="m5_Lstar" style="display:block; font-weight:bold; font-size:0.85em;">必要特性長 \(L^*\) [m]:</label>
+                  <input type="number" id="m5_Lstar" value="2.0" step="0.1">
+                </div>
+              </div>
+            </div>
+          </div>
         </fieldset>
       </div>
 
