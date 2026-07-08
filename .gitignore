@@ -4,6 +4,11 @@ CS_モード追加マニュアル(課題風)(CS.ver4.1.0想定)/
 Output/
 SaveData/
 SUBARU/
+Designdata/
+Engine_datasheet/
+Otherdata/
+Oxidantdata/
+Thrustdata/
 settings.json
 *.xlsx
 *.csv
