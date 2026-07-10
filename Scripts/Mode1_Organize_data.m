@@ -5,42 +5,49 @@ classdef Mode1_Organize_data < BaseSystem
     methods
         %手続き関数.
         %main関数ではこれが呼び出される.
-        function [Class, output] = run(Class,~)
-            %データの取り込み
+        function [Class, output] = run(Class,gs)
+            Class.choice = gs; % GUIの設定をここに流し込む！
+            % データの取り込み
             disp('データの取り込みを開始します。')
-            Class = Class.Input();
+            Class = Class.Input(gs); % Inputにもgsを渡してパスを制御
             disp('データの取り込みが完了しました。')
+            % 設定読み込み（自動判定）
+            Class = Class.Load_choice();
             %設定の再利用
             Class = Class.Load_choice();
             %推力データのカット
             disp('推力データのカットを開始します。')
-            Class = Class.History();
+            Class = Class.History(gs);
             disp('推力データのカットが完了しました。')
             %グラフの出力
             disp('グラフの出力を開始します。')
-            Class = Class.Graph();
+            Class = Class.Graph(gs);
             disp('グラフの出力を完了しました。')
             %結果の出力
             [Class,output] = Class.Output(Class.output);
-            Class = Class.csvout();
+            Class = Class.csvout(gs);
             %設定の保存
-            Class.Save_choice();
+            %Class.Save_choice();
         end
 
         %結果表示関数
-        function [Class,msg] = Output(Class,Class_output)
+        function [Class,msg] = Output(Class,Class_output, gs)
 
-            if(isfield(Class.choice,'noiseremoved'))
+            % 1. gs (GeneralSetting) から設定を取得、なければデフォルト値を設定
+            if nargin >= 3 && ~isempty(gs)
+                % JSONから読み込んだ設定を優先
+                noiseremoved = gs.noiseremoved;
+                spikecut = gs.spikecut;
+            elseif isfield(Class.choice, 'noiseremoved')
+                % 既存のchoiceがあればそれを使用
                 noiseremoved = Class.choice.noiseremoved;
                 spikecut = Class.choice.spikecut;
             else
-                noiseremoved = questdlg('ノイズ除去を行った結果も表示しますか？', ...
-                    'Remove noise?',"Yes","No","No");
-                Class.choice.noiseremoved = noiseremoved;
-                spikecut = questdlg('スパイクカットを行った結果も表示しますか？', ...
-                    'Remove noise?',"Yes","No","No");
-                Class.choice.spikecut = spikecut;
+                % どちらもなければデフォルト値を代入
+                noiseremoved = "No";
+                spikecut = "No";
             end
+            
             Class.choice.noiseremoved = noiseremoved;
             Class.choice.spikecut = spikecut;
 
@@ -59,29 +66,43 @@ classdef Mode1_Organize_data < BaseSystem
 
         %設定読み込み関数。何度も選択肢を押すのが億劫なため用意.
         function Class = Load_choice(Class)
-            cd('../SaveData')
-            filename = strcat(Class.info.engine,'_savedata.xml');
-
-            if(exist(filename,"file"))
-                savedata = readstruct(filename,"FileType","xml");
-                % 前回の設定をUIで表示
-                h = helpdlg(evalc("disp(savedata)"), "前回 設定");
-                msg = "前回の設定を利用しますか?";
-                answer = questdlg(msg,'Use SaveData?',"Yes","No","No");
-                if(answer == "Yes")
+            % 1. 基準となるルートディレクトリを取得
+            % (mfilename('fullpath')で自身のパスを特定し、そこからルートに戻る)
+            root = fileparts(fileparts(mfilename('fullpath')));
+            saveDir = fullfile(root, 'SaveData');
+            filename = fullfile(saveDir, strcat(Class.info.engine, '_savedata.xml'));
+        
+            % 2. ファイルの存在確認
+            if exist(filename, "file")
+                % GUI設定から「前回の設定を使う」というフラグが立っているかチェック
+                use_auto_load = isfield(Class.choice, 'use_previous') && ...
+                                strcmp(Class.choice.use_previous, "Yes");
+                
+                % 「自動使用」がONならダイアログを出さずに読み込む
+                if use_auto_load
+                    savedata = readstruct(filename, "FileType", "xml");
                     Class.choice = savedata;
+                    disp("前回の設定を自動適用しました。");
+                else
+                    % それ以外（GUIで設定がない/Noの場合）はダイアログを出す
+                    savedata = readstruct(filename, "FileType", "xml");
+                    h = helpdlg(evalc("disp(savedata)"), "前回 設定");
+                    answer = questdlg("前回の設定を利用しますか?", 'Use SaveData?', "Yes", "No", "No");
+                    if strcmp(answer, "Yes")
+                        Class.choice = savedata;
+                    end
+                    delete(h);
                 end
-                delete(h);
+            else
+                disp("保存された設定ファイルが見つかりません。");
             end
-            cd('../Scripts')
         end
 
         %設定保存関数。何度も選択肢を押すのが億劫なため用意.
         function Save_choice(Class)
-            cd('../SaveData')
-            filename = strcat(Class.info.engine,'_savedata.xml');
-            writestruct(Class.choice,filename);
-            cd('../Scripts')
+            root = fileparts(fileparts(mfilename('fullpath')));
+            filename = fullfile(root, 'SaveData', strcat(Class.info.engine, '_savedata.xml'));
+            writestruct(Class.choice, filename);
         end
 
     end

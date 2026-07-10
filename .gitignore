@@ -8,7 +8,9 @@ Designdata/
 Engine_datasheet/
 Otherdata/
 Oxidantdata/
+Settings/
 Thrustdata/
+compress_project.py
 settings.json
 *.xlsx
 *.csv

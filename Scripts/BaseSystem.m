@@ -18,12 +18,23 @@ classdef BaseSystem
 
     methods
         %データ読み込み関数(内部でInfile関数を呼び出す).
-        function Class = Input(Class)
-            %推力データファイルを選択
-            cd('../Thrustdata');
-            infile = uigetfile('*.xlsx','Select a thrustdata file');
-            cd('../Scripts');
-            [Class.info,thrustdata] = Infile(Class,infile);
+        function Class = Input(Class, gs)
+            % gs.thrust の中にある path と fn を結合してフルパスを作る
+            if isprop(gs, 'thrust') && isfield(gs.thrust, 'path') && isfield(gs.thrust, 'fn')
+                fullFilePath = fullfile(gs.thrust.path, gs.thrust.fn);
+                
+                if exist(fullFilePath, 'file')
+                    disp(['自動適用: ', fullFilePath]);
+                    infile = gs.thrust.fn;
+                else
+                    error(['エラー: ファイルが存在しません: ', fullFilePath]);
+                end
+            else
+                error('エラー: settings.jsonに推力データの設定が見当たりません。');
+            end
+            
+            % データの読み込み処理（uigetfileを使わず直行する）
+            [Class.info, thrustdata] = Infile(Class, fullFilePath, infile);
             ColNames = thrustdata.Properties.VariableNames;%列の名前
             Otherdataind = table2array(thrustdata(:,'実験機'));%実験機データの位置を探索
             atmrow = find(ColNames == "実験機",1);
@@ -44,7 +55,7 @@ classdef BaseSystem
         end
 
         %ファイル読み込み関数.
-        function [info,thrustdata] = Infile(~,infile)
+        function [info,thrustdata] = Infile(~, fullFilePath, infile)
             filename = erase(infile,".xlsx");
             info.thrustdate = cell2mat(extract(filename,digitsPattern + textBoundary));
             info.engine = extractBefore(filename,"_thrustdata");
@@ -53,16 +64,14 @@ classdef BaseSystem
             disp(msg);
             msg = strcat('読み込むエンジンタイプ：',info.type);
             disp(msg);
-            %推力データファイルの読み込み
-            cd('../Thrustdata');
-            thrustdata = readtable(infile,"VariableNamingRule","preserve", ...
-                'DataRange','A2','VariableNamesRange',"1:1");
-            cd('../Scripts');
+            % cd を使わず、fullFilePath を直接指定
+            thrustdata = readtable(fullFilePath, "VariableNamingRule", "preserve", ...
+                'DataRange', 'A2', 'VariableNamesRange', "1:1");
         end
 
         %履歴等の重要情報を算出・記録する関数.
         %(内部でThrust_History,Tank_Chamber_History関数を呼び出す).
-        function Class = History(Class)
+        function Class = History(Class, gs)
             %必要なデータを変数へ格納
             t = Class.data.t;             %時間データ
             thrust = Class.data.thrust;   %推力データ
@@ -93,13 +102,18 @@ classdef BaseSystem
             Class.history.removed_thrust = removed_thrust(initial_i:end_i);
             %ノイズ除去後推力から得られたデータ
             Class.output.noiseremoved = Thrust_History(Class,t,removed_thrust);
+
+            Class.choice.residual_time = gs.residual_time;
             
             %燃料残留時間を算出.
             if(isfield(Class.choice,'residual_time'))
                 residual_time = Class.choice.residual_time;
-            else
-                question = strcat('燃料残留時間を計算しますか？');
-                residual_time = questdlg(question,'Calc_Residual_Time',"Yes","No","Yes");
+            elseif nargin > 1 && ~isempty(gs) && isprop(gs, 'residual_time')
+                % gsにプロパティがあればそれを使う
+                residual_time = gs.residual_time;
+            %else
+            %    question = strcat('燃料残留時間を計算しますか？');
+            %    residual_time = questdlg(question,'Calc_Residual_Time',"Yes","No","Yes");
             end
             Class.choice.residual_time = residual_time;
             if(residual_time == "Yes")
@@ -275,13 +289,31 @@ classdef BaseSystem
         end
 
         %グラフ表示関数.
-        function Class = Graph(Class)
-            %作成可能なグラフリストの製作.
-            graphlist = ["推力" ,"ノイズ除去後推力","スパイクカット後推力"];
-            timelist = ["t","t","spikecut_t"];
-            outputlist = ["thrust","removed_thrust","spikecut_thrust"];
-            yaxislist = ["推力[N]","推力[N]","推力[N]"];
-            titlelist = ["推力履歴","ノイズ除去後推力履歴","スパイクカット後推力履歴"];
+        function Class = Graph(Class, gs)
+            graphlist = "推力";
+            timelist = "t";
+            outputlist = "thrust";
+            yaxislist = "推力[N]";
+            titlelist = "推力履歴";
+        
+            % gsの設定に基づいて動的にリストを構築
+            % ノイズ除去の設定を確認
+            if nargin > 1 && isprop(gs, 'noiseremoved') && gs.noiseremoved == "Yes"
+                graphlist = [graphlist, "ノイズ除去後推力"];
+                timelist = [timelist, "t"];
+                outputlist = [outputlist, "removed_thrust"];
+                yaxislist = [yaxislist, "推力[N]"];
+                titlelist = [titlelist, "ノイズ除去後推力履歴"];
+            end
+        
+            % スパイクカットの設定を確認
+            if nargin > 1 && isprop(gs, 'spikecut') && gs.spikecut == "Yes"
+                graphlist = [graphlist, "スパイクカット後推力"];
+                timelist = [timelist, "spikecut_t"];
+                outputlist = [outputlist, "spikecut_thrust"];
+                yaxislist = [yaxislist, "推力[N]"];
+                titlelist = [titlelist, "スパイクカット後推力履歴"];
+            end
 
             if(isfield(Class.history,'pt'))%タンク圧がある場合.
                 graphlist = [graphlist,"タンク圧力"];
@@ -299,17 +331,17 @@ classdef BaseSystem
                 titlelist = [titlelist,"燃焼室圧力履歴"];
             end
 
+            if ~isfield(Class, 'choice') || isempty(Class.choice)
+                Class.choice = struct();
+            end
+
             %描画するグラフの選択.
-            if(length(graphlist) > 1)
-                if(isfield(Class.choice,'indx'))%選択肢が記録されている場合.
-                    indx = Class.choice.indx;
-                else
-                    indx = listdlg('PromptString','出力するグラフをすべて選択',...
-                        'Name','Select mode',...
-                        'SelectionMode','Multiple',...
-                        'ListString',graphlist);
-                    Class.choice.indx = indx;
-                end
+            if(length(graphlist) >= 1)
+                % indxを1からgraphlistの長さまで設定（全選択）
+                indx = 1:length(graphlist);
+                Class.choice.indx = indx;
+            else
+                indx = 0;
             end
 
             if(indx > 0)
@@ -349,24 +381,39 @@ classdef BaseSystem
         end
 
         %CSVファイル出力関数.
-        function Class = csvout(Class)
-            cd('../Output')
-            Class.choice.csvout = questdlg('推力履歴をcsv出力しますか？', ...
-                'Output the csv File?',"Yes","No","Yes");
+        function Class = csvout(Class, gs)
+            root = fileparts(fileparts(mfilename('fullpath')));
+            outputDir = fullfile(root, 'Output'); 
+            
+            % --- 修正箇所: ダイアログを出さず、設定値またはデフォルトで決定 ---
+            if nargin > 1 && isprop(gs, 'csvout')
+                csvout_choice = gs.csvout;
+            else
+                csvout_choice = "Yes"; % 設定がない場合はデフォルトでYes
+            end
+            
+            Class.choice.csvout = csvout_choice;
+            
+            % CSV出力処理
             if(Class.choice.csvout == "Yes")
+                % フォルダが存在しない場合に作成
+                if ~exist(outputDir, 'dir')
+                    mkdir(outputDir);
+                end
+                
                 varNames = {'time[s]','thrust[N]','removed_thrust[N]'};
                 time = Class.history.t;
                 thrust = Class.history.thrust;
                 removed_thrust = Class.history.removed_thrust;
-
                 filedata = table(time,thrust,removed_thrust,'VariableNames',varNames);
-
+                
                 Class.info.filename = strcat(Class.info.engine,'_thrustdata_', ...
                     num2str(Class.info.thrustdate),'.csv');
-
-                writetable(filedata,Class.info.filename)
+                fullSavePath = fullfile(outputDir, Class.info.filename);
+                writetable(filedata, fullSavePath);
+                disp(['CSVを出力しました: ', fullSavePath]);
             end
-            cd('../Scripts')
+            % cd('../Scripts') % ※注意: cdコマンドは予期せぬエラーの原因になるため、可能な限り使用を避けることを推奨します
         end
     end
 end

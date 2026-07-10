@@ -21,15 +21,20 @@ def APP_BASE():
     return os.path.dirname(os.path.abspath(__file__))
 
 BASE = APP_BASE()
-SETTINGS_DIR = args.settings_dir or os.path.join(BASE, 'CurrentSetting')
-os.makedirs(SETTINGS_DIR, exist_ok=True)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
-PRESETTINGS_FILE = args.presettings_file or os.path.join(BASE, 'PreSettings', 'PreSettings.json')
+# 起動引数 --settings-dir があればそれを使用、なければ従来通り
+SETTINGS_DIR = args.settings_dir or os.path.join(PROJECT_ROOT, 'Settings')
+# 念のため作成
+if not os.path.exists(SETTINGS_DIR):
+    os.makedirs(SETTINGS_DIR, exist_ok=True)
 
-UPLOAD_DIR = os.path.join(BASE, 'assets', 'uploads')
+PRESETTINGS_FILE = args.presettings_file or os.path.join(PROJECT_ROOT, 'PreSettings', 'PreSettings.json')
+
+UPLOAD_DIR = os.path.join(PROJECT_ROOT, 'assets', 'uploads')
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-LOG_FILE = os.path.join(BASE, 'GeneralSettingUI.log')
+LOG_FILE = os.path.join(PROJECT_ROOT, 'GeneralSettingUI.log')
 def log(msg: str):
     try:
         with open(LOG_FILE, 'a', encoding='utf-8') as f:
@@ -40,68 +45,44 @@ def log(msg: str):
 class API:
 
     def __init__(self):   
-        self.last_action = False   # True | False(=×で閉じた場合)
+        self.last_action = False   # True: 保存ボタン経由で正常終了 | False: ×ボタン等で閉じた場合
         self.window = None         # main()で現在のウインドウが代入されます
 
-    # ---- [修正] pywebview純正のファイル選択（Tkinterを完全排除） ----
-    def open_file(self, filters=None, multiple=False):
-        try:
-            if not self.window:
-                log("open_file error: self.window is not initialized")
-                return None
-
-            file_types = []
-            if filters:
-                for f in filters:
-                    desc = f.get('description', 'Files')
-                    exts = ";".join([f"*.{e}" for e in f.get('extensions', ['*'])])
-                    file_types.append(f"{desc} ({exts})")
-            else:
-                file_types = ["All Files (*.*)"]
-
-            # pywebview自身のウインドウから直接OSのダイアログを開く（フリーズしない）
-            res = self.window.create_file_dialog(
-                webview.OPEN_DIALOG,
-                allow_multiple=multiple,
-                file_types=tuple(file_types)
-            )
-            
-            log(f'open_file (native) -> {res}')
-            if res:
-                return res if multiple else res[0]
+    # ---- 修正: window を経由してダイアログを呼ぶ ----
+    def open_file(self, *args):
+        if not self.window:
             return None
-        except Exception as e:
-            log(f'open_file exception: {e}')
-            return {'ok': False, 'error': str(e)}
+        # webview.create_file_dialog ではなく self.window を使う
+        result = self.window.create_file_dialog(webview.FileDialog.OPEN)
+        if result:
+            return result[0]
+        return None
 
-    # ---- [修正] pywebview純正のフォルダ選択（Tkinterを完全排除） ----
-    def open_dir(self):
-        try:
-            if not self.window:
-                log("open_dir error: self.window is not initialized")
-                return None
-
-            # pywebview自身のウインドウから直接OSのフォルダ選択を開く（絶対に目詰まりしない）
-            res = self.window.create_file_dialog(webview.FOLDER_DIALOG)
-            
-            log(f'open_dir (native) -> {res}')
-            if res and len(res) > 0:
-                return res[0]
+    def open_dir(self, *args):
+        if not self.window:
             return None
-        except Exception as e:
-            log(f'open_dir exception: {e}')
-            return {'ok': False, 'error': str(e)}
+        # フォルダ選択も同様
+        res = self.window.create_file_dialog(webview.FileDialog.DIALOG)
+        if res and len(res) > 0:
+            return res[0]
+        return None
 
-    # ---- 保存（Settings/{filename}）----
+    # ---- ✨ 統合保存API（すべてのモードのパラメータをsettings.jsonへ一括出力） ----
     def save_settings(self, payload, filename='settings.json'):
         try:
             dst = os.path.join(SETTINGS_DIR, filename)
+            
+            # JSから送られてきた統合payload（全モード内包）を上書き保存
             with open(dst, 'w', encoding='utf-8') as f:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
+                
             log(f'save_settings -> {dst}')
+            
+            # ボタン押下による正常保存フラグを立てる
             self.last_action = True 
+            
             if self.window is not None:
-                self.window.destroy()
+                self.window.destroy()  # UIを消滅させ、MATLABのsystem待機を突破させる
             return {'ok': True, 'path': dst}
         except Exception as e:
             log(f'save_settings exception: {e}')
@@ -115,7 +96,6 @@ class API:
                 
             initdir = SETTINGS_DIR if os.path.isdir(SETTINGS_DIR) else BASE
             
-            # 保存ダイアログもpywebview純正に変更
             res = self.window.create_file_dialog(
                 webview.SAVE_DIALOG,
                 directory=initdir,
@@ -195,7 +175,7 @@ class API:
                 
             initdir = SETTINGS_DIR if os.path.isdir(SETTINGS_DIR) else BASE
             res = self.window.create_file_dialog(
-                webview.OPEN_DIALOG,
+                webview.FileDialog.OPEN,
                 directory=initdir,
                 file_types=("JSON files (*.json)", "All Files (*.*)")
             )
@@ -230,39 +210,8 @@ class API:
         except Exception as e:
             log(f'import_image_to_public exception: {e}')
             return {'ok': False, 'error': str(e)}
-    
-    # ---- モード4（自作エンジン解析）の設定を保存する ----
-    def save_mode4_settings(self, payload):
-        try:
-            dst = os.path.join(SETTINGS_DIR, 'mode4_settings.json')
-            with open(dst, 'w', encoding='utf-8') as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-            log(f'save_mode4_settings -> {dst}')
-            self.last_action = True
-            if self.window is not None:
-                self.window.destroy()
-            return {'ok': True}
-        except Exception as e:
-            log(f'save_mode4_settings exception: {e}')
-            return {'ok': False, 'error': str(e)}
-
-    # ---- モード5（エンジンパラメータ設計）の設定を保存する ----
-    def save_mode5_settings(self, payload):
-        try:
-            dst = os.path.join(SETTINGS_DIR, 'mode5_settings.json')
-            with open(dst, 'w', encoding='utf-8') as f:
-                json.dump(payload, f, ensure_ascii=False, indent=2)
-            log(f'save_mode5_settings -> {dst}')
-            self.last_action = True
-            if self.window is not None:
-                self.window.destroy()
-            return {'ok': True}
-        except Exception as e:
-            log(f'save_mode5_settings exception: {e}')
-            return {'ok': False, 'error': str(e)}
 
 def main():
-
     api = API()
     window = webview.create_window(
         title='General Settings UI',
@@ -282,15 +231,18 @@ def main():
         """)
 
     window.events.loaded += on_loaded
-    
-    # ★ ここでAPIクラスに現在のwindowオブジェクトを渡します
     api.window = window
 
     webview.start(debug=False, http_server=True)
 
+    # 💡 【セーフティ】ユーザーが右上「×ボタン」で強制終了した場合のフォールバック
     if api.last_action is False:
         dst = os.path.join(SETTINGS_DIR, 'settings.json')
-        marker = {'closed_by_x': True}
+        marker = {
+            'closed_by_x': True,
+            'cancelled': True,
+            'current_mode': 1  # MATLAB側のパースエラーを防ぐためのセーフ値
+        }
         try:
             if os.path.isfile(dst):
                 with open(dst, 'r', encoding='utf-8') as f:

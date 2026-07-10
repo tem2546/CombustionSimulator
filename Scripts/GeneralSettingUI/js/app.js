@@ -1,7 +1,7 @@
 // js/app.js
 import { byId } from "./core/dom.js";
 import { SettingsStore } from "./core/store.js";
-import { ModelSettings } from "./sections/model-settings.js";
+import { ModelSettings } from "./sections/mode1-settings.js";
 import { CondSettings } from "./sections/cond-settings.js";
 import { RollSettings } from "./sections/roll-settings.js";
 import { OutputSettings } from "./sections/output-settings.js";
@@ -23,6 +23,9 @@ const mode3  = new Mode3Settings();
 const mode4  = new Mode4Settings();
 const mode5  = new Mode5Settings();
 
+// ✨ すべてのセクションを管理する配列（メンテナンス性を高めるため一括化）
+const allSections = [model, mode2, mode3, mode4, mode5, cond, roll, output];
+
 function sanitizeFileFields(data) {
   const cleaned = { ...data };
   for (const k of FILE_KEYS) {
@@ -31,20 +34,29 @@ function sanitizeFileFields(data) {
   return cleaned;
 }
 
+// 💡 外部からデータを読み込んだときに、各クラスの画面反映メソッド (apply または applyDefaults) を安全に叩く関数
 function safeApplyDefaults(sec) {
-  if (typeof sec?.applyDefaults === "function") sec.applyDefaults();
+  const currentStoreData = store.get();
+  // Mode 3〜5 は、引数にデータを直接受け取る `apply(data)` スタイルになっているため分岐対応
+  if (typeof sec?.apply === "function") {
+    sec.apply(currentStoreData);
+  } else if (typeof sec?.applyDefaults === "function") {
+    sec.applyDefaults();
+  }
 }
+
 function safeCollectPayload(sec) {
   return typeof sec?.collectPayload === "function" ? sec.collectPayload() ?? {} : {};
 }
+
 function safeCheckValidity(sec, payload) {
   return typeof sec?.checkValidity === "function" ? sec.checkValidity(payload) ?? [] : [];
 }
 
 function refreshAllSectionUi() {
   requestAnimationFrame(() => {
-    const sections = [model, mode2, cond, roll, output];
-    for (const sec of sections) {
+    // 💡 修正：Mode 3, 4, 5 も含めて、全UIコンポーネントを最新データで再描画する
+    for (const sec of allSections) {
       safeApplyDefaults(sec);
     }
   });
@@ -71,8 +83,8 @@ async function bootstrap() {
   await whenPywebviewReady();
 
   // 2. 各セクションの初期化処理
-  const sections = [model, mode2, cond, roll, output];
-  for (const sec of sections) {
+  // 💡 修正：Mode 3, 4, 5 も含めて store インスタンスを初期化時に紐付ける
+  for (const sec of allSections) {
     if (typeof sec?.init === "function") sec.init(store);
   }
 
@@ -133,6 +145,41 @@ async function bootstrap() {
   // 3. 現在の設定を保存して終了
   // ==========================================
   byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
+    // 全モードのデータをフラットにマージ
+    const payload = { 
+      ...safeCollectPayload(model),
+      ...safeCollectPayload(mode2),
+      ...safeCollectPayload(mode3),
+      ...safeCollectPayload(mode4),
+      ...safeCollectPayload(mode5),
+      ...safeCollectPayload(output)
+    };
+    
+    // 全モードの入力値バリデーションを実行
+    const errs = [
+      ...safeCheckValidity(model, payload),
+      ...safeCheckValidity(mode2, payload),
+      ...safeCheckValidity(mode3, payload),
+      ...safeCheckValidity(mode4, payload),
+      ...safeCheckValidity(mode5, payload),
+      ...safeCheckValidity(output, payload)
+    ];
+
+    if (errs.length) {
+      const msg = byId("msg");
+      if (msg) msg.textContent = "エラー: " + errs.join(" / ");
+      return;
+    }
+    
+    // 💡 修正した Python側の save_settings APIを叩き、UIを閉じてMATLABへ制御を戻す
+    await window.pywebview.api.save_settings(payload, "settings.json");
+  }));
+
+  // ==========================================
+  // 4. 名前を付けて保存
+  // ==========================================
+  byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
+    // 💡 修正：saveBtnと同様に、名前を付けて保存する場合もMode 3〜5のデータを含める
     const payload = { 
       ...safeCollectPayload(model),
       ...safeCollectPayload(mode2),
@@ -148,30 +195,6 @@ async function bootstrap() {
       ...safeCheckValidity(mode3, payload),
       ...safeCheckValidity(mode4, payload),
       ...safeCheckValidity(mode5, payload),
-      ...safeCheckValidity(output, payload)
-    ];
-
-    if (errs.length) {
-      const msg = byId("msg");
-      if (msg) msg.textContent = "エラー: " + errs.join(" / ");
-      return;
-    }
-    await window.pywebview.api.save_settings(payload, "settings.json");
-  }));
-
-  // ==========================================
-  // 4. 名前を付けて保存
-  // ==========================================
-  byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
-    const payload = { 
-      ...safeCollectPayload(model),
-      ...safeCollectPayload(mode2),
-      ...safeCollectPayload(output)
-    };
-    
-    const errs = [
-      ...safeCheckValidity(model, payload),
-      ...safeCheckValidity(mode2, payload),
       ...safeCheckValidity(output, payload)
     ];
 
