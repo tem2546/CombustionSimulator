@@ -56,17 +56,24 @@ classdef BaseSystem
 
         %ファイル読み込み関数.
         function [info,thrustdata] = Infile(~, fullFilePath, infile)
-            filename = erase(infile,".xlsx");
+            filename = erase(infile, [".xlsx", ".csv"]);
             info.thrustdate = cell2mat(extract(filename,digitsPattern + textBoundary));
             info.engine = extractBefore(filename,"_thrustdata");
             info.type = extractBefore(filename,"_");
+            [~, ~, ext] = fileparts(fullFilePath);
+            if strcmpi(ext, '.xlsx')
+                % Excelの場合（従来の処理）
+                thrustdata = readtable(fullFilePath, "VariableNamingRule", "preserve", ...
+                    'DataRange', 'A2', 'VariableNamesRange', "1:1");
+            else
+                % CSVの場合（DataRangeなし）
+                thrustdata = readtable(fullFilePath, "VariableNamingRule", "preserve");
+            end
             msg = strcat('読み込む推力データファイル：',filename);
             disp(msg);
             msg = strcat('読み込むエンジンタイプ：',info.type);
             disp(msg);
-            % cd を使わず、fullFilePath を直接指定
-            thrustdata = readtable(fullFilePath, "VariableNamingRule", "preserve", ...
-                'DataRange', 'A2', 'VariableNamesRange', "1:1");
+            
         end
 
         %履歴等の重要情報を算出・記録する関数.

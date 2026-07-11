@@ -62,7 +62,7 @@ class API:
         if not self.window:
             return None
         # フォルダ選択も同様
-        res = self.window.create_file_dialog(webview.FileDialog.DIALOG)
+        res = self.window.create_file_dialog(webview.FOLDER_DIALOG)
         if res and len(res) > 0:
             return res[0]
         return None

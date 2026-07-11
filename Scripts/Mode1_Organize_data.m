@@ -12,9 +12,9 @@ classdef Mode1_Organize_data < BaseSystem
             Class = Class.Input(gs); % Inputにもgsを渡してパスを制御
             disp('データの取り込みが完了しました。')
             % 設定読み込み（自動判定）
-            Class = Class.Load_choice();
+            Class = Class.Load_choice(gs);
             %設定の再利用
-            Class = Class.Load_choice();
+            Class = Class.Load_choice(gs);
             %推力データのカット
             disp('推力データのカットを開始します。')
             Class = Class.History(gs);
@@ -24,7 +24,7 @@ classdef Mode1_Organize_data < BaseSystem
             Class = Class.Graph(gs);
             disp('グラフの出力を完了しました。')
             %結果の出力
-            [Class,output] = Class.Output(Class.output);
+            [Class,output] = Class.Output(Class.output, gs);
             Class = Class.csvout(gs);
             %設定の保存
             %Class.Save_choice();
@@ -53,19 +53,19 @@ classdef Mode1_Organize_data < BaseSystem
 
             msg.origin = Output@BaseSystem(Class,Class_output.origin);
 
-            if(isfield(Class_output,'noiseremoved'))
+            if(gs.noiseremoved == "Yes" && isfield(Class_output,'noiseremoved'))
                 disp("ノイズ除去後");
                 msg.noiseremoved = Output@BaseSystem(Class,Class_output.noiseremoved);
             end
 
-            if(isfield(Class_output,'noiseremoved'))
+            if(gs.spikecut == "Yes" && isfield(Class_output,'noiseremoved'))
                 disp("スパイクカット後");
                 msg.spikecut = Output@BaseSystem(Class,Class_output.spikecut);
             end
         end
 
         %設定読み込み関数。何度も選択肢を押すのが億劫なため用意.
-        function Class = Load_choice(Class)
+        function Class = Load_choice(Class, gs)
             % 1. 基準となるルートディレクトリを取得
             % (mfilename('fullpath')で自身のパスを特定し、そこからルートに戻る)
             root = fileparts(fileparts(mfilename('fullpath')));
@@ -83,14 +83,14 @@ classdef Mode1_Organize_data < BaseSystem
                     savedata = readstruct(filename, "FileType", "xml");
                     Class.choice = savedata;
                     disp("前回の設定を自動適用しました。");
-                else
+                %else
                     % それ以外（GUIで設定がない/Noの場合）はダイアログを出す
-                    savedata = readstruct(filename, "FileType", "xml");
-                    h = helpdlg(evalc("disp(savedata)"), "前回 設定");
-                    answer = questdlg("前回の設定を利用しますか?", 'Use SaveData?', "Yes", "No", "No");
-                    if strcmp(answer, "Yes")
-                        Class.choice = savedata;
-                    end
+               %     savedata = readstruct(filename, "FileType", "xml");
+               %     h = helpdlg(evalc("disp(savedata)"), "前回 設定");
+               %     answer = questdlg("前回の設定を利用しますか?", 'Use SaveData?', "Yes", "No", "No");
+               %     if strcmp(answer, "Yes")
+               %         Class.choice = savedata;
+               %     end
                     delete(h);
                 end
             else
@@ -99,11 +99,11 @@ classdef Mode1_Organize_data < BaseSystem
         end
 
         %設定保存関数。何度も選択肢を押すのが億劫なため用意.
-        function Save_choice(Class)
-            root = fileparts(fileparts(mfilename('fullpath')));
-            filename = fullfile(root, 'SaveData', strcat(Class.info.engine, '_savedata.xml'));
-            writestruct(Class.choice, filename);
-        end
+        %function Save_choice(Class)
+        %    root = fileparts(fileparts(mfilename('fullpath')));
+        %    filename = fullfile(root, 'SaveData', strcat(Class.info.engine, '_savedata.xml'));
+        %    writestruct(Class.choice, filename);
+        %end
 
     end
 end
