@@ -401,7 +401,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             end
         end
 
-        function [initial,final,ave,planed_burning_time,dfs,Lf,a,n] = Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do)
+        function [initial,final,ave,planed_burning_time,dfs,Lf,a,n,dt] = Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do)
             while(true)
                 %以下燃料設計
                 %最終圧力推定
@@ -567,7 +567,7 @@ while(flag.req==1)
     disp('<供給系設計完了>');
 
     disp('<燃料系設計開始>')
-    [initial,final,ave,planed_burning_time,dfs,Lf,a,n] = Mode5_Design_HomebrewEngine.Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do);
+    [initial,final,ave,planed_burning_time,dfs,Lf,a,n,dt] = Mode5_Design_HomebrewEngine.Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do);
     disp('<燃料系設計完了>')
 
     %燃焼終了時の各質量流量
@@ -660,6 +660,24 @@ while(flag.req==1)
             I_req=input('再決定した要求トータルインパルス[Ns]：');
         end
     end
+end
+
+%グレインの燃料内径・燃料後退速度の時間変化をCSV出力
+time = (0:length(dfs)-1)'*dt;                %時間[s]
+rdot = 2*a*(4*ave.mdot_ox./(pi*dfs.^2)).^n;  %燃料後退速度[m/s]
+
+exportcsv = questdlg('グレインの燃料内径・燃料後退速度の時間変化をcsv出力しますか？', ...
+    'Output the csv File?',"Yes","No","Yes");
+if(exportcsv == "Yes")
+    cd('../Output')
+
+    dfTable = table(time,dfs,'VariableNames',{'time[s]','df[m]'});
+    writetable(dfTable,'DesignEngine_df_history.csv')
+
+    rdotTable = table(time,rdot,'VariableNames',{'time[s]','rdot[m/s]'});
+    writetable(rdotTable,'DesignEngine_rdot_history.csv')
+
+    cd('../Scripts')
 end
 
 %パラメータ割り当て
