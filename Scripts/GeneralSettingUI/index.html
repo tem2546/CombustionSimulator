@@ -25,7 +25,7 @@
 
   <!-- モード選択 -->
   <div class="mode-selector-container" style="margin: 20px; padding: 15px; background: rgba(245, 245, 245, 0.8); border: 1px solid #ccc; border-radius: 6px; display: flex; align-items: center;">
-    <label for="modeSelect" style="font-weight: bold; margin-right: 15px; color: #333;" data-i18n="mode.select_label">実行モードを選択してください:</label>
+    <label for="modeSelect" style="font-weight: bold; margin-right: 15px; color: #333;" data-i18n="mode.select_label">設定するモードを選択してください:</label>
     <select id="modeSelect" style="padding: 6px 12px; font-size: 15px; border-radius: 4px; border: 1px solid #bbb; background: #fff; cursor: pointer; min-width: 300px;">
       <option value="mode1">1. データ整理</option>
       <option value="mode2">2. データ比較（複数データ整理）</option>
@@ -33,6 +33,28 @@
       <option value="mode4">4. 自作エンジン解析（4パラメータ同定）</option>
       <option value="mode5">5. エンジンパラメータ設計</option>
     </select>
+  </div>
+
+  <!-- 実行モード選択（一つだけ選択可能） -->
+  <div class="exec-mode-container">
+    <label class="exec-mode-title">実行するモードを選択してください:</label>
+    <div class="exec-mode-options">
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="1" checked> 1. データ整理
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="2"> 2. データ比較
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="3"> 3. CEA_GUI
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="4"> 4. 自作エンジン解析
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="5"> 5. エンジンパラメータ設計
+      </label>
+    </div>
   </div>
 
   <div class="grid">

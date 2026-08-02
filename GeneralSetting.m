@@ -1,6 +1,7 @@
 classdef GeneralSetting < handle
     properties
         jsonPath
+        execution_mode = 1
         current_mode = 1
         modeSelect = "mode1"
         thrust

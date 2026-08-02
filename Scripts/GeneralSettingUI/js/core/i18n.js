@@ -23,6 +23,9 @@ export const dict = {
     // ---- 状態テキスト ----
     "status.unselected": "(未選択)",
 
+    // ---- モード選択 ----
+    "mode.select_label": "実行モード選択",
+
     // ---- 機体モデル設定 ----
     "model.legend": "機体モデル設定",
     "model.param": "諸元表ファイル (.xlsx)",
@@ -237,6 +240,9 @@ export const dict = {
     "toolbar.open": "Open settings file…",
 
     "status.unselected": "(none)",
+
+    // ---- mode select ----
+    "mode.select_label": "Select Execution Mode",
 
     // ---- Model ----
     "model.legend": "Rocket Model Settings",

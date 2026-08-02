@@ -34,7 +34,7 @@ export class ModelSettings {
       modeSelect.addEventListener("change", this.toggleModePanels);
     }
 
-    // ---- 【重要】推力履歴データのファイル選択を確実にバインド ----
+    // ---- 推力履歴データのファイル選択をバインド ----
     const pickThrustBtn = byId("pickThrustBtn");
     if (pickThrustBtn) {
       pickThrustBtn.addEventListener("click", async (e) => {
@@ -82,10 +82,21 @@ export class ModelSettings {
     setVal("spikecut",     s.spikecut     || "No");
     setVal("csvout",       s.csvout       || "Yes");
     setVal("calc_residual_time", s.residual_time || "Yes");
+
+    // 保存されていた execution_mode をラジオボタンに反映
+    // const s = this.store.get();
+    const execMode = s.execution_mode || "1";
+    const radio = document.querySelector(`input[name="execution_mode"][value="${execMode}"]`);
+    if (radio) radio.checked = true;
   }
 
   collectPayload() {
     const s = this.store.get();
+
+    // 現在選択されているラジオボタンの値を取得
+    const checkedRadio = document.querySelector('input[name="execution_mode"]:checked');
+    const executionMode = checkedRadio ? checkedRadio.value : "1";
+
     return {
       modeSelect:   byId("modeSelect")?.value || "mode1",
       thrust:       { fn: s.thrust?.fn ?? "", path: s.thrust?.path ?? "" },
@@ -93,6 +104,7 @@ export class ModelSettings {
       spikecut:     byId("spikecut")?.value || "No",
       csvout:       byId("csvout")?.value || "Yes",
       residual_time: byId("calc_residual_time")?.value || "Yes",
+      execution_mode: executionMode, // 実行モードの値を追加
     };
   }
 

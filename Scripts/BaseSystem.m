@@ -57,7 +57,16 @@ classdef BaseSystem
         %ファイル読み込み関数.
         function [info,thrustdata] = Infile(~, fullFilePath, infile)
             filename = erase(infile, [".xlsx", ".csv"]);
-            info.thrustdate = cell2mat(extract(filename,digitsPattern + textBoundary));
+            
+            % extractの結果をstring配列またはcharとして取得する
+            extractedDate = extract(filename, digitsPattern + textBoundary);
+            if iscell(extractedDate)
+                info.thrustdate = cell2mat(extractedDate);
+            else
+                % 文字列配列の場合は先頭の要素を文字列として取得
+                info.thrustdate = char(string(extractedDate(1)));
+            end
+
             info.engine = extractBefore(filename,"_thrustdata");
             info.type = extractBefore(filename,"_");
             [~, ~, ext] = fileparts(fullFilePath);

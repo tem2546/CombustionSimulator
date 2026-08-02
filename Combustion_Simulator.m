@@ -15,10 +15,18 @@ function Combustion_Simulator()
     %JSONを読み込む
     gs.load();
 
+    choice = questdlg('シミュレーションを実行しますか？', ...
+        '実行確認', ...
+        '実行する', 'キャンセル', '実行する');
     
+    if ~strcmp(choice, '実行する')
+        disp('シミュレーションをキャンセルしました。');
+        return; % ここで処理を終了する
+    end
     
     % 4. 実行 (Mode1などはパスが通っているので直接呼び出せる)
-    mode = gs.current_mode;
+    % mode = gs.execution_mode;
+    mode = double(string(gs.execution_mode));
     
     fprintf('モード %d を実行します。\n', mode);
     
