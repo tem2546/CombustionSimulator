@@ -2,12 +2,15 @@ function Combustion_Simulator()
     % このファイルがあるディレクトリ（CombustionSimulatorフォルダ）を取得
     [root, ~, ~] = fileparts(mfilename('fullpath'));
     
-    jsonPath = fullfile(root, 'Settings', 'settings.json');
-    
     % gsオブジェクトの作成と初期化
     gs = GeneralSetting();
-    gs.setRoot(root);
-    gs.jsonPath = jsonPath; % ここで正確なパスを渡す
+
+    % settings.jsonのパスを取得
+    gs.settingsPath(root);
+    gs.jsonPath; % ここで正確なパスを渡す
+
+    
+    disp(gs.scriptsPath)
     
     % UI起動
     gs.launchUI();
@@ -29,6 +32,10 @@ function Combustion_Simulator()
     mode = double(string(gs.execution_mode));
     
     fprintf('モード %d を実行します。\n', mode);
+
+    old = pwd; % 今いるパスを保存
+    gs.ScriptsPath(root);
+    cd(gs.scriptsPath) % Scriptsパスに移動
     
     tic
     switch mode
@@ -45,6 +52,8 @@ function Combustion_Simulator()
             Mode5_Design_HomebrewEngine().run(gs);
     end
     toc
+
+    cd(old) % 元のフォルダに戻る
     
     disp('終了');
 end

@@ -122,18 +122,20 @@ classdef Mode2_Compare_data < BaseSystem
             yaxis_list = {'推力[N]', 'タンク圧力[MPa]', '燃焼室圧力[MPa]'};
             title_list = {'推力履歴', 'タンク圧力履歴', '燃焼室圧力履歴'};
             
-            % GeneralSetting の compare_graphs プロパティを使用する
-            indx = [];
-            if isprop(gs, 'compare_graphs') && isstruct(gs.compare_graphs)
-                if isfield(gs.compare_graphs, 'thrust') && gs.compare_graphs.thrust
-                    indx(end+1) = 1; % "thrust"
-                end
-                % 必要に応じて他のグラフの判定もここに追加できます
-            end
-            
-            if isempty(indx)
-                indx = 1; % デフォルトで thrust を描画
-            end
+            % % GeneralSetting の compare_graphs プロパティを使用する
+            % indx = [];
+            % if isprop(gs, 'compare_graphs') && isstruct(gs.compare_graphs)
+            %     if isfield(gs.compare_graphs, 'thrust') && gs.compare_graphs.thrust
+            %         indx(end+1) = 1; % "thrust"
+            %     end
+            %     % 必要に応じて他のグラフの判定もここに追加できます
+            % end
+            % 
+            % if isempty(indx)
+            %     indx = 1; % デフォルトで thrust を描画
+            % end
+
+            indx = 1:3;
             
             for i = 1:length(indx)
                 figure

@@ -150,9 +150,6 @@ export class Mode2Settings {
       if (chosenNum < targetNum) {
         errs.push(`比較するデータファイルが不足しています（${targetNum}機中、${chosenNum}機が設定済み）。`);
       }
-      if (!payload.compare_graphs.thrust && !payload.compare_graphs.removed_thrust) {
-        errs.push("比較出力するグラフを少なくとも1つ選択してください。");
-      }
     }
     return errs;
   }

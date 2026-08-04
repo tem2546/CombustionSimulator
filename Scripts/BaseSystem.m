@@ -429,7 +429,7 @@ classdef BaseSystem
                 writetable(filedata, fullSavePath);
                 disp(['CSVを出力しました: ', fullSavePath]);
             end
-            % cd('../Scripts') % ※注意: cdコマンドは予期せぬエラーの原因になるため、可能な限り使用を避けることを推奨します
+            % cd('../Scripts')
         end
     end
 end

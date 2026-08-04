@@ -24,9 +24,9 @@
   </div>
 
   <!-- モード選択 -->
-  <div class="mode-selector-container" style="margin: 20px; padding: 15px; background: rgba(245, 245, 245, 0.8); border: 1px solid #ccc; border-radius: 6px; display: flex; align-items: center;">
-    <label for="modeSelect" style="font-weight: bold; margin-right: 15px; color: #333;" data-i18n="mode.select_label">設定するモードを選択してください:</label>
-    <select id="modeSelect" style="padding: 6px 12px; font-size: 15px; border-radius: 4px; border: 1px solid #bbb; background: #fff; cursor: pointer; min-width: 300px;">
+  <div class="mode-selector-container">
+    <label class="modeSelect" data-i18n="mode.select_label">設定するモードを選択してください:</label>
+    <select class="modeSelect-option" id="modeSelect">
       <option value="mode1">1. データ整理</option>
       <option value="mode2">2. データ比較（複数データ整理）</option>
       <option value="mode3">3. CEA_GUI</option>
@@ -170,7 +170,7 @@
           </div>
 
           <!-- 出力するグラフ -->
-          <div class="field">
+          <!-- <div class="field">
             <div class="field-head">
               <label>比較出力するグラフ（複数選択可）</label>
             </div>
@@ -182,7 +182,7 @@
                 <input type="checkbox" id="compare_graph_removed"> <span>ノイズ除去後推力 (removed_thrust)</span>
               </label>
             </div>
-          </div>
+          </div> -->
 
           <!-- 比較データファイル -->
           <div class="field">

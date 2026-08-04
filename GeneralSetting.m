@@ -1,6 +1,7 @@
 classdef GeneralSetting < handle
     properties
         jsonPath
+        scriptsPath
         execution_mode = 1
         current_mode = 1
         modeSelect = "mode1"
@@ -45,13 +46,18 @@ classdef GeneralSetting < handle
     end
     
     methods
-        % コンストラクタを空にする（引数エラーを物理的に消す）
+        % コンストラクタを空にする
         function obj = GeneralSetting()
         end
         
-        % 設定用のメソッド
-        function setRoot(obj, root)
+        % settings.jsonの絶対パスを作成
+        function settingsPath(obj, root)
             obj.jsonPath = fullfile(root, 'Settings', 'settings.json');
+        end
+
+        % Scriptsフォルダの絶対パスを作成
+        function ScriptsPath(obj, root)
+            obj.scriptsPath = fullfile(root, 'Scripts');
         end
         
         function launchUI(obj)

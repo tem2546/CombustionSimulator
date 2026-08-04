@@ -412,6 +412,35 @@ select[disabled]{
   box-shadow: 0 0 0 3px rgba(229,77,46,.25) !important;
 }
 
+/* モード選択コンテナ */
+.mode-selector-container {
+  margin: 20px;
+  padding: 15px;
+  background: rgba(245, 245, 245, 0.8);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.modeSelect {
+  font-weight: bold;
+  margin-right: 15px;
+  color: #333;
+}
+
+.modeSelect-option {
+  padding: 6px 12px;
+  font-size: 15px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  background: #fff;
+  cursor: pointer;
+  min-width: 300px;
+}
+
+
+
 /* 実行モード選択コンテナ */
 .exec-mode-container {
   margin: 0 20px 20px 20px;
