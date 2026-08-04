@@ -17,12 +17,12 @@ classdef GeneralSetting < handle
         compare_files = []
         m3_fuel_select = "PP"
         m3_oxidant_select = "N2O"
-        m3_hkj = -713
-        m3_c_atom = 3
+        m3_hkj = -713.01204
+        m3_c_atom = 30
         m3_o_atom = 0
-        m3_h_atom = 6
+        m3_h_atom = 60
         m3_n_atom = 0
-        m3_tk = 298.15
+        m3_tk = 297
         m4_engine_select = "EngineA"
         m4_thrust_file_select = ""
         m4_oxidant_select = "N2O"

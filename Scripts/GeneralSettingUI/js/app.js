@@ -2,8 +2,8 @@
 import { byId } from "./core/dom.js";
 import { SettingsStore } from "./core/store.js";
 import { ModelSettings } from "./sections/mode1-settings.js";
-import { CondSettings } from "./sections/cond-settings.js";
-import { RollSettings } from "./sections/roll-settings.js";
+//import { CondSettings } from "./sections/cond-settings.js";
+//import { RollSettings } from "./sections/roll-settings.js";
 import { OutputSettings } from "./sections/output-settings.js";
 import { initLang, toggleLang } from "./core/i18n.js";
 import { Mode2Settings } from "./sections/mode2-settings.js";
@@ -15,8 +15,8 @@ const FILE_KEYS = ["thrust"];
 
 const store  = new SettingsStore();
 const model  = new ModelSettings();
-const cond   = new CondSettings();
-const roll   = new RollSettings();
+//const cond   = new CondSettings();
+//const roll   = new RollSettings();
 const output = new OutputSettings();
 const mode2  = new Mode2Settings();
 const mode3  = new Mode3Settings();
@@ -24,7 +24,7 @@ const mode4  = new Mode4Settings();
 const mode5  = new Mode5Settings();
 
 // ✨ すべてのセクションを管理する配列（メンテナンス性を高めるため一括化）
-const allSections = [model, mode2, mode3, mode4, mode5, cond, roll, output];
+const allSections = [model, mode2, mode3, mode4, mode5, output];
 
 function sanitizeFileFields(data) {
   const cleaned = { ...data };
@@ -154,7 +154,7 @@ async function bootstrap() {
       ...safeCollectPayload(mode5),
       ...safeCollectPayload(output)
     };
-    
+
     // 全モードの入力値バリデーションを実行
     const errs = [
       ...safeCheckValidity(model, payload),

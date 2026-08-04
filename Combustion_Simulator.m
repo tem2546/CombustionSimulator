@@ -8,9 +8,6 @@ function Combustion_Simulator()
     % settings.jsonのパスを取得
     gs.settingsPath(root);
     gs.jsonPath; % ここで正確なパスを渡す
-
-    
-    disp(gs.scriptsPath)
     
     % UI起動
     gs.launchUI();
