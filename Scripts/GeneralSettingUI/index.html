@@ -128,7 +128,7 @@
       </div>
 
       <!-- データ比較モード -->
-      <div id="panel_mode2" style="display:none">
+      <div id="panel_mode2" class="mode-panel">
         <fieldset>
           <legend>データ比較モード</legend>
 
@@ -147,7 +147,7 @@
           </div>
 
           <!-- データ数入力 -->
-          <div id="custom_datanum_row" class="field" style="display:none">
+          <div id="custom_datanum_row" class="field" class="field">
             <div class="field-head">
               <label>データ数を直接入力</label>
             </div>
@@ -189,66 +189,66 @@
             <div class="field-head">
               <label>比較対象データファイル (.xlsx)</label>
             </div>
-            <div class="filerow" style="gap: 10px; align-items: flex-start; flex-direction: column;">
+            <div class="filerow compare-filerow">
               
-              <div style="text-align: left; width: 100%;">
-                <button id="clearCompareFilesBtn" class="btn btn-danger" style="background-color: #dc3545; color: white;">全選択をクリア</button>
+              <div class="compare-clear-wrapper">
+                <button id="clearCompareFilesBtn" class="btn btn-danger">全選択をクリア</button>
               </div>
 
-              <div id="compare_dynamic_grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; width: 100%; margin-top: 5px;"></div>
+              <div id="compare_dynamic_grid" class="compare-dynamic-grid"></div>
 
             </div>
         </fieldset>
       </div>
 
       <!-- CEA_GUIモード -->
-      <div id="panel_mode3" class="mode-panel" style="display:none;">
+      <div id="panel_mode3" class="mode-panel">
         <fieldset>
           <legend>3. CEA_GUI モード</legend>
-          <div class="cea-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
-            <div>
-              <label for="m3_fuel_select"  style="display: block; font-weight: bold; margin-bottom: 5px;">燃料:</label>
-              <input type="text" id="m3_fuel_select" value="PP" style="width: 100%;">
+          <div class="cea-form-grid">
+            <div class="form-group">
+              <label for="m3_fuel_select">燃料:</label>
+              <input type="text" id="m3_fuel_select" value="PP">
             </div>
-            <div>
-              <label for="m3_oxidant_select" style="display: block; font-weight: bold; margin-bottom: 5px;">酸化剤:</label>
-              <input type="text" id="m3_oxidant_select" value="N2O" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_oxidant_select">酸化剤:</label>
+              <input type="text" id="m3_oxidant_select" value="N2O">
             </div>
-            <div>
-              <label for="m3_hkj" style="display: block; font-weight: bold; margin-bottom: 5px;">h, kj/mol: 生成エンタルピー</label>
-              <input type="number" id="m3_hkj" value="-713.01204" step="any" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_hkj">h, kj/mol: 生成エンタルピー</label>
+              <input type="number" id="m3_hkj" value="-713.01204" step="any">
             </div>
-            <div>
-              <label for="m3_c_atom" style="display: block; font-weight: bold; margin-bottom: 5px;">C: 分子内の炭素原子の数</label>
-              <input type="number" id="m3_c_atom" value="30" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_c_atom">C: 分子内の炭素原子の数</label>
+              <input type="number" id="m3_c_atom" value="30">
             </div>
-            <div>
-              <label for="m3_o_atom" style="display: block; font-weight: bold; margin-bottom: 5px;">O: 分子内の酸素原子の数</label>
-              <input type="number" id="m3_o_atom" value="0" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_o_atom">O: 分子内の酸素原子の数</label>
+              <input type="number" id="m3_o_atom" value="0">
             </div>
-            <div>
-              <label for="m3_h_atom" style="display: block; font-weight: bold; margin-bottom: 5px;">H: 分子内の水素原子の数</label>
-              <input type="number" id="m3_h_atom" value="60" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_h_atom">H: 分子内の水素原子の数</label>
+              <input type="number" id="m3_h_atom" value="60">
             </div>
-            <div>
-              <label for="m3_n_atom" style="display: block; font-weight: bold; margin-bottom: 5px;">N: 分子内の窒素原子の数</label>
-              <input type="number" id="m3_n_atom" value="0" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_n_atom">N: 分子内の窒素原子の数</label>
+              <input type="number" id="m3_n_atom" value="0">
             </div>
-            <div>
-              <label for="m3_tk" style="display: block; font-weight: bold; margin-bottom: 5px;">t, k: 初期温度, 単位 k</label>
-              <input type="number" id="m3_tk" value="297" style="width: 100%;">
+            <div class="form-group">
+              <label for="m3_tk">t, k: 初期温度, 単位 k</label>
+              <input type="number" id="m3_tk" value="297">
             </div>
           </div>
         </fieldset>
       </div>
 
       <!-- 自作エンジン解析モード -->
-      <div id="panel_mode4" class="mode-panel" style="display:none;">
+      <div id="panel_mode4" class="mode-panel">
         <fieldset>
           <legend>4. 自作エンジン解析 モード</legend>
-          <div class="analysis-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
-            <div>
-              <label for="engine_select" style="display: block; font-weight: bold; margin-bottom: 5px;">解析するエンジン:</label>
+          <div class="analysis-form-grid">
+            <div class="form-group">
+              <label for="engine_select">解析するエンジン:</label>
               <select id="m4_engine_select">
                 <option value="j-2i">j-2i</option>
                 <option value="j-3i">j-3i</option>
@@ -257,31 +257,31 @@
 
             <!-- Mode4 推力ファイル選択部分のHTML例 -->
             <div>
-              <label style="display: block; font-weight: bold; margin-bottom: 5px;">推力データファイル (.xlsx):</label>
-              <div class="filerow" style="display: flex; align-items: center; gap: 10px;">
+              <label>推力データファイル (.xlsx):</label>
+              <div class="filerow">
                 <button type="button" id="m4_pick_thrust_btn" class="btn">ファイルを選択</button>
-                <span id="m4_thrust_fn_label" class="file-label" style="word-break: break-all;">(未選択)</span>
+                <span id="m4_thrust_fn_label" class="file-label">(未選択)</span>
               </div>
             </div>
 
-            <div>
-              <label for="oxidant_select" style="display: block; font-weight: bold; margin-bottom: 5px;">③ 酸化剤:</label>
+            <div class="form-group">
+              <label for="oxidant_select">③ 酸化剤:</label>
               <select id="m4_oxidant_select">
                 <option value="N2O">N2O (亜酸化窒素)</option>
                 <option value="LOX">LOX (液体酸素)</option>
               </select>
             </div>
 
-            <div>
-              <label for="fuel_select" style="display: block; font-weight: bold; margin-bottom: 5px;">燃料:</label>
+            <div class="form-group">
+              <label for="fuel_select">燃料:</label>
               <select id="m4_fuel_select">
                 <option value="PP">PP (ポリプロピレン)</option>
                 <option value="PE">PE (ポリエチレン)</option>
               </select>
             </div>
 
-            <div>
-              <label for="m4_spikecut" style="display: block; font-weight: bold; margin-bottom: 5px;">スパイクカットの実行:</label>
+            <div class="form-group">
+              <label for="m4_spikecut">スパイクカットの実行:</label>
               <select id="m4_spikecut">
                 <option value="Yes">Yes（異常な突出値を除去）</option>
                 <option value="No">No（スパイクカットをしない）</option>
@@ -293,47 +293,47 @@
       </div>
 
       <!-- エンジンパラメータ設計モード -->
-      <div id="panel_mode5" class="mode-panel" style="display:none;">
+      <div id="panel_mode5" class="mode-panel">
         <fieldset>
           <legend>5. エンジンパラメータ設計 モード</legend>
-          <div class="design-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+          <div class="design-container">
             
-            <div class="design-left-col" style="background: #fdfdfd; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">
-              <h4 style="margin-top: 0; color: #444; border-bottom: 2px solid #bbb; padding-bottom: 3px;">① 要求仕様 & 推進薬設定</h4>
+            <div class="design-left-col">
+              <h4>要求仕様 & 推進薬設定</h4>
               
-              <div style="margin-bottom: 10px;">
-                <label style="display:block; font-weight:bold; font-size:0.9em;">酸化剤選択:</label>
+              <div class="design-field">
+                <label>酸化剤選択:</label>
                 <select id="m5_oxidant_select">
                   <option value="N2O">N2O (亜酸化窒素)</option>
-                  <option value="LOX">LOX (液体酸素)</option>
                 </select>
               </div>
 
-              <div style="margin-bottom: 10px;">
-                <label style="display:block; font-weight:bold; font-size:0.9em;">燃料選択:</label>
+              <div class="design-field">
+                <label>燃料選択:</label>
                 <select id="m5_fuel_select">
-                  <option value="PP">PP (ポリプロピレン)</option>
-                  <option value="PE">PE (ポリエチレン)</option>
+                  <option value="PP">PP</option>
+                  <option value="PE">PE</option>
+                  <option value="PE">ABS</option>
                 </select>
               </div>
 
-              <div style="margin-bottom: 10px;">
-                <label for="m5_F_req" style="display:block; font-weight:bold; font-size:0.9em;">要求推力 \(F_{\text{req}}\) [N]:</label>
+              <div class="design-field">
+                <label for="m5_F_req">要求推力 \(F_{\text{req}}\) [N]:</label>
                 <input type="number" id="m5_F_req" value="250">
               </div>
 
-              <div style="margin-bottom: 10px;">
-                <label for="m5_I_req" style="display:block; font-weight:bold; font-size:0.9em;">要求トータルインパルス \(I_{\text{req}}\) [Ns]:</label>
+              <div class="design-field">
+                <label for="m5_I_req">要求トータルインパルス \(I_{\text{req}}\) [Ns]:</label>
                 <input type="number" id="m5_I_req" value="1500">
               </div>
 
-              <div style="margin-bottom: 10px;">
-                <label for="m5_vt" style="display:block; font-weight:bold; font-size:0.9em;">タンク容積 \(V_\text{t}\) [cc]:</label>
+              <div class="design-field">
+                <label for="m5_vt">タンク容積 \(V_\text{t}\) [cc]:</label>
                 <input type="number" id="m5_vt" value="2000">
               </div>
             </div>
 
-            <div class="design-right-col" style="background: #fbfdff; padding: 10px; border-radius: 4px; border: 1px solid #bce0ff;">
+            <!-- <div class="design-right-col" style="background: #fbfdff; padding: 10px; border-radius: 4px; border: 1px solid #bce0ff;">
               <h4 style="margin-top: 0; color: #004494; border-bottom: 2px solid #9ecfff; padding-bottom: 3px;">② 供給系・幾何学パラメータ</h4>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -370,27 +370,27 @@
                   <input type="number" id="m5_Lstar" value="2.0" step="0.1">
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </fieldset>
       </div>
 
       <!-- すべてのモードの共通部分 -->
-      <div id="panel_output" class="common-panel" style="margin-top: 25px;">
-        <fieldset style="border: 1px solid #1a7f37; border-radius: 6px;">
-          <legend style="color: #1a7f37; font-weight: bold; padding: 0 8px;">出力設定</legend>
+      <div id="panel_output" class="common-panel">
+        <fieldset class="output-fieldset">
+          <legend class="output-legend">出力設定</legend>
 
           <div class="field">
             <div class="field-head">
               <label for="outputModeSelect">保存先モード</label>
             </div>
-            <select id="outputModeSelect" style="min-width: 250px;">
+            <select id="outputModeSelect" class="output-mode-select">
               <option value="auto">自動（デフォルトの Output フォルダ）</option>
               <option value="manual">手動（保存先を自分で指定する）</option>
             </select>
           </div>
 
-          <div id="manual_path_row" class="field" style="display: none;">
+          <div id="manual_path_row" class="field">
             <div class="field-head">
               <label>出力先フォルダ</label>
             </div>

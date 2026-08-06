@@ -10,23 +10,23 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
     methods
         %手続き関数.
         %main関数ではこれが呼び出される.
-        function [Class] = run(Class,list)
+        function [Class] = run(Class, gs)
             %データの取り込み
             disp('データの取り込みを開始します。')
-            [data,Class.choice] = Class.Input(list);
+            [data,Class.choice] = Class.Input(gs);
             disp('データの取り込みが完了しました。')
 
             %エンジン設計
             disp('設計モードを開始します')
-            Class = Class.Design(data);
+            Class = Class.Design(data, gs);
             disp('設計モードを終了します')
         end
     end
 
     methods (Static)
         %エンジン設計用データ読み込み
-        function [data,choice] = Input(list)
-            [filedata,choice] = Mode5_Design_HomebrewEngine.Infile(list);
+        function [data,choice] = Input(gs)
+            [filedata,choice] = Mode5_Design_HomebrewEngine.Infile(gs);
             CEAdata = filedata.CEAdata;
             Oxiddata = filedata.oxiddata;
             Fueldata = filedata.fueldata;
@@ -51,26 +51,38 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
         end
 
         %設計用ファイル読み込み
-        function [filedata,choice] = Infile(list)
-            %酸化剤を選択
-            [infile_indxs.oxidant]=listdlg('PromptString','酸化剤を選択',...
-                'Name','Oxidant Selection',...
-                'SelectionMode','Single',...
-                'ListString',list.oxidant);
-            choice.oxidant=list.oxidant{infile_indxs.oxidant};
-            infile.oxidant=strcat(choice.oxidant,'_data.xlsx');
-            msg=strcat('選択した酸化剤：',choice.oxidant);
-            disp(msg)
+        function [filedata,choice] = Infile(gs)
+            % %酸化剤を選択
+            % [infile_indxs.oxidant]=listdlg('PromptString','酸化剤を選択',...
+            %     'Name','Oxidant Selection',...
+            %     'SelectionMode','Single',...
+            %     'ListString',list.oxidant);
+            % choice.oxidant=list.oxidant{infile_indxs.oxidant};
+            % infile.oxidant=strcat(choice.oxidant,'_data.xlsx');
+            % msg=strcat('選択した酸化剤：',choice.oxidant);
+            % disp(msg)
+            % 
+            % %燃料を選択
+            % [infile_indxs.fuel]=listdlg('PromptString','燃料を選択',...
+            %     'Name','Fuel Selection',...
+            %     'SelectionMode','Single',...
+            %     'ListString',list.fuel);
+            % infile.fuel='Fuel_data.xlsx';
+            % choice.fuel=list.fuel{infile_indxs.fuel};
+            % msg=strcat('選択した燃料：',choice.fuel);
+            % disp(msg)
 
-            %燃料を選択
-            [infile_indxs.fuel]=listdlg('PromptString','燃料を選択',...
-                'Name','Fuel Selection',...
-                'SelectionMode','Single',...
-                'ListString',list.fuel);
-            infile.fuel='Fuel_data.xlsx';
-            choice.fuel=list.fuel{infile_indxs.fuel};
-            msg=strcat('選択した燃料：',choice.fuel);
-            disp(msg)
+            % UIから選択された酸化剤・燃料を直接取得
+            choice.oxidant = gs.m5_oxidant_select;
+            choice.fuel = gs.m5_fuel_select;
+            
+            disp(strcat('選択した酸化剤：', choice.oxidant));
+            disp(strcat('選択した燃料：', choice.fuel));
+
+            infile.oxidant = strcat(choice.oxidant, '_data.xlsx');
+            infile.fuel = 'Fuel_data.xlsx';
+            infile.cstar = strcat(choice.fuel, choice.oxidant, '_cstar.csv');
+            infile.gamma = strcat(choice.fuel, choice.oxidant, '_gamma.csv');
 
             infile.cstar=strcat(choice.fuel,choice.oxidant,'_cstar.csv');
             infile.gamma=strcat(choice.fuel,choice.oxidant,'_gamma.csv');
@@ -93,9 +105,9 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             filedata.fueldata = fueldata;%燃料データ
         end
 
-        function Class = Design(data)
+        function Class = Design(data, gs)
 
-            Class.parameters = design_parameter(data.chamber);
+            Class.parameters = design_parameter(data.chamber, gs);
 
         end
 
@@ -543,7 +555,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
 end
 
 %パラメータ設計
-function parameters = design_parameter(data)
+function parameters = design_parameter(data, gs)
 
 cstar = data.cstar;     %特性排気速度
 gamma = data.gamma;     %比熱比
@@ -553,11 +565,14 @@ pe = 1.013*10^5;          %大気圧
 
 %要求値設定
 %要求推力
-F_req = input('要求推力[N]:');
+F_req = gs.m5_F_req;
+disp('要求推力:', F_req, '[N]')
 %要求トータルインパルス
-I_req=input('トータルインパルスの要求値[Ns]:');
+I_req = gs.m5_I_req;
+disp('要求トータルインパルス:', I_req, '[Ns]')
 %タンク容積
-vt=input('タンク容積[cc]:')*10^(-6);
+vt = gs.m5_vt*10^(-6);
+disp('タンク容量:', vt, '[cc]')
 
 flag.req=1;
 while(flag.req==1)
