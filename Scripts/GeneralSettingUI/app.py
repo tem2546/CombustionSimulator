@@ -233,7 +233,7 @@ def main():
     window.events.loaded += on_loaded
     api.window = window
 
-    webview.start(debug=True, http_server=True)
+    webview.start(debug=False, http_server=True)
 
     # 💡 【セーフティ】ユーザーが右上「×ボタン」で強制終了した場合のフォールバック
     if api.last_action is False:

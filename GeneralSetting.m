@@ -23,10 +23,11 @@ classdef GeneralSetting < handle
         m3_h_atom = 60
         m3_n_atom = 0
         m3_tk = 297
-        m4_engine_select = "EngineA"
-        m4_thrust_file_select = ""
+        m4_engine_select = "j-2i"
+        m4_thrust_file_select = struct('fn', '', 'path', '')
         m4_oxidant_select = "N2O"
         m4_fuel_select = "PP"
+        % m4_spikecut = "Yes"
         m5_oxidant_select = "N2O"
         m5_fuel_select = "PP"
         m5_F_req = 250

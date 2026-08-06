@@ -248,34 +248,45 @@
           <legend>4. 自作エンジン解析 モード</legend>
           <div class="analysis-form-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
             <div>
-              <label for="engine_select" style="display: block; font-weight: bold; margin-bottom: 5px;">① 解析するエンジン:</label>
-              <select id="engine_select">
-                <option value="EngineA">EngineA</option>
-                <option value="EngineB">EngineB</option>
+              <label for="engine_select" style="display: block; font-weight: bold; margin-bottom: 5px;">解析するエンジン:</label>
+              <select id="m4_engine_select">
+                <option value="j-2i">j-2i</option>
+                <option value="j-3i">j-3i</option>
                 </select>
             </div>
 
+            <!-- Mode4 推力ファイル選択部分のHTML例 -->
             <div>
-              <label for="thrust_file_select" style="display: block; font-weight: bold; margin-bottom: 5px;">② 推力データファイル (.xlsx):</label>
-              <select id="thrust_file_select">
-                <option value="">-- ファイルを選択してください --</option>
-                </select>
+              <label style="display: block; font-weight: bold; margin-bottom: 5px;">推力データファイル (.xlsx):</label>
+              <div class="filerow" style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" id="m4_pick_thrust_btn" class="btn">ファイルを選択</button>
+                <span id="m4_thrust_fn_label" class="file-label" style="word-break: break-all;">(未選択)</span>
+              </div>
             </div>
 
             <div>
               <label for="oxidant_select" style="display: block; font-weight: bold; margin-bottom: 5px;">③ 酸化剤:</label>
-              <select id="oxidant_select">
+              <select id="m4_oxidant_select">
                 <option value="N2O">N2O (亜酸化窒素)</option>
                 <option value="LOX">LOX (液体酸素)</option>
               </select>
             </div>
 
             <div>
-              <label for="fuel_select" style="display: block; font-weight: bold; margin-bottom: 5px;">④ 燃料:</label>
-              <select id="fuel_select">
+              <label for="fuel_select" style="display: block; font-weight: bold; margin-bottom: 5px;">燃料:</label>
+              <select id="m4_fuel_select">
                 <option value="PP">PP (ポリプロピレン)</option>
                 <option value="PE">PE (ポリエチレン)</option>
               </select>
+            </div>
+
+            <div>
+              <label for="m4_spikecut" style="display: block; font-weight: bold; margin-bottom: 5px;">スパイクカットの実行:</label>
+              <select id="m4_spikecut">
+                <option value="Yes">Yes（異常な突出値を除去）</option>
+                <option value="No">No（スパイクカットをしない）</option>
+              </select>
+              <span class="note">推力のスパイクと燃焼室圧力のスパイクのずれを修正するか選択してください。</span>
             </div>
           </div>
         </fieldset>

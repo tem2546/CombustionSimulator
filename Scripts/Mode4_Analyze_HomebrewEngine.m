@@ -34,14 +34,14 @@ classdef Mode4_Analyze_HomebrewEngine < BaseSystem
     methods
         %手続き関数.
         %main関数ではこれが呼び出される.
-        function Class = run(Class,list)
+        function Class = run(Class, gs)
             %データの取り込み
             disp('データの取り込みを開始します。')
-            Class = Class.Input(list);
+            Class = Class.Input(gs);
             disp('データの取り込みが完了しました。')
             %推力データのカット
             disp('推力データのカットを開始します。')
-            Class = Class.History();
+            Class = Class.History(gs);
             disp('推力データのカットが完了しました。')
             if(isfield(Class.output.origin,'ResidualTime'))
                 Class.data.tank.t_liquid = Class.output.origin.ResidualTime;
@@ -64,10 +64,10 @@ classdef Mode4_Analyze_HomebrewEngine < BaseSystem
         end
 
         %自作エンジン解析用入力
-        function Class = Input(Class,list)
+        function Class = Input(Class, gs)
             %自作エンジン用
             %ファイル読み込み
-            [Class,enginedata,thrustdata,CEAdata,oxiddata,choice] = Class.Infile(list);
+            [Class,enginedata,thrustdata,CEAdata,oxiddata,choice] = Class.Infile(gs);
             choice.load = "No";
             %tankインスタンス
             data.tank.vt=enginedata(1,4)*10^-6;              %タンク容量[m^3]
@@ -127,64 +127,99 @@ classdef Mode4_Analyze_HomebrewEngine < BaseSystem
         end
 
         %自作エンジンファイル入力関数
-        function [Class,enginedata,thrustdata,CEAdata,oxiddata,choice] = Infile(Class,list)
+        function [Class,enginedata,thrustdata,CEAdata,oxiddata,choice] = Infile(Class, gs)
 
             %解析するエンジンを選択
-            [infile_indxs.engine]=listdlg('PromptString','エンジンを選択',...
-                'Name','Engine Selection',...
-                'SelectionMode','Single',...
-                'ListString',list.engine);
-            if(isempty(infile_indxs.engine))
+            % [infile_indxs.engine]=listdlg('PromptString','エンジンを選択',...
+            %     'Name','Engine Selection',...
+            %     'SelectionMode','Single',...
+            %     'ListString',list.engine);
+            if isprop(gs, 'm4_engine_select') && ~isempty(gs.m4_engine_select)
+                choice.engine = string(gs.m4_engine_select);
+            else
                 msg = 'エンジンの型が指定されていません。';
                 error(msg)
             end
-            choice.engine=list.engine{infile_indxs.engine};
+            % choice.engine=list.engine{infile_indxs.engine};
             infile.engine=strcat(choice.engine,'_datasheet.xlsx');
             msg1=strcat('選択したエンジン：',choice.engine);
             disp(msg1)
 
             %解析する推力データを選択
-            cd('../Thrustdata')
-            infile.thrust=uigetfile("*.xlsx");
-            cd('../Scripts')
+            if isprop(gs, 'm4_thrust_file_select') && ~isempty(gs.m4_thrust_file_select)
+                thrustFileObj = gs.m4_thrust_file_select;
+                if isstruct(thrustFileObj) && isfield(thrustFileObj, 'fn') && ~isempty(thrustFileObj.fn)
+                    infile.thrust = thrustFileObj.fn;
+                    thrustFilePath = fullfile(thrustFileObj.path, infile.thrust);
+                elseif ischar(thrustFileObj) || isstring(thrustFileObj)
+                    thrustFilePath = char(thrustFileObj);
+                    [~, name, ext] = fileparts(thrustFilePath);
+                    infile.thrust = [name, ext];
+                else
+                    error('推力データファイルの指定が不正です。');
+                end
+            else
+                error('推力データファイルが選択されていません。');
+            end
+
+            % cd('../Thrustdata')
+            % infile.thrust=uigetfile("*.xlsx");
+            % cd('../Scripts')
+
             filename=erase(infile.thrust,".xlsx");
             choice.thrust=cell2mat(extract(filename,digitsPattern + textBoundary));
             msg2=strcat('読み込む推力データファイル：',infile.thrust);
             disp(msg2)
 
             %酸化剤を選択
-            [infile_indxs.oxidant]=listdlg('PromptString','酸化剤を選択',...
-                'Name','Oxidant Selection',...
-                'SelectionMode','Single',...
-                'ListString',list.oxidant);
-            choice.oxidant=list.oxidant{infile_indxs.oxidant};
+            % [infile_indxs.oxidant]=listdlg('PromptString','酸化剤を選択',...
+            %     'Name','Oxidant Selection',...
+            %     'SelectionMode','Single',...
+            %     'ListString',list.oxidant);
+            % choice.oxidant=list.oxidant{infile_indxs.oxidant};
+            if isprop(gs, 'm4_oxidant_select') && ~isempty(gs.m4_oxidant_select)
+                choice.oxidant = string(gs.m4_oxidant_select);
+            else
+                error('酸化剤が指定されていません。');
+            end
             infile.oxidant=strcat(choice.oxidant,'_data.xlsx');
             msg3=strcat('選択した酸化剤：',choice.oxidant);
             disp(msg3)
 
 
             %燃料を選択
-            [infile_indxs.fuel]=listdlg('PromptString','燃料を選択',...
-                'Name','Fuel Selection',...
-                'SelectionMode','Single',...
-                'ListString',list.fuel);
-            choice.fuel=list.fuel{infile_indxs.fuel};
+            % [infile_indxs.fuel]=listdlg('PromptString','燃料を選択',...
+            %     'Name','Fuel Selection',...
+            %     'SelectionMode','Single',...
+            %     'ListString',list.fuel);
+            % choice.fuel=list.fuel{infile_indxs.fuel};
+            if isprop(gs, 'm4_fuel_select') && ~isempty(gs.m4_fuel_select)
+                choice.fuel = string(gs.m4_fuel_select);
+            else
+                error('燃料が指定されていません。');
+            end
             msg4=strcat('選択した燃料：',choice.fuel);
             disp(msg4)
 
             infile.cstar=strcat(choice.fuel,choice.oxidant,'_cstar.csv');
             infile.gamma=strcat(choice.fuel,choice.oxidant,'_gamma.csv');
+
             %ファイルの読み込み
-            cd('../Engine_datasheet');
-            enginedata=readmatrix(infile.engine);       %エンジンデータ
-            cd('../Thrustdata');
-            thrustdata=readmatrix(infile.thrust);       %推力データ
-            cd('../CEAdata');
-            CEAdata.cstar=readmatrix(infile.cstar);     %特性排気速度
-            CEAdata.gamma=readmatrix(infile.gamma);     %比熱比@燃焼室
-            cd('../Oxidantdata');
-            oxiddata=readmatrix(infile.oxidant);        %酸化剤データ
-            cd('../Scripts');
+            % cd('../Engine_datasheet');
+            % enginedata=readmatrix(infile.engine);       %エンジンデータ
+            % cd('../Thrustdata');
+            % thrustdata=readmatrix(infile.thrust);       %推力データ
+            % cd('../CEAdata');
+            % CEAdata.cstar=readmatrix(infile.cstar);     %特性排気速度
+            % CEAdata.gamma=readmatrix(infile.gamma);     %比熱比@燃焼室
+            % cd('../Oxidantdata');
+            % oxiddata=readmatrix(infile.oxidant);        %酸化剤データ
+            % cd('../Scripts');
+            enginedata = readmatrix(fullfile('../Engine_datasheet', infile.engine));
+            thrustdata = readmatrix(thrustFilePath);
+            CEAdata.cstar = readmatrix(fullfile('../CEAdata', infile.cstar));
+            CEAdata.gamma = readmatrix(fullfile('../CEAdata', infile.gamma));
+            oxiddata = readmatrix(fullfile('../Oxidantdata', infile.oxidant));
         end
 
         %タンク圧データを基に流量係数を推定.
@@ -787,6 +822,9 @@ end
 
 %線形補間を用いて燃焼室圧、O/F比にあったCEAデータを取り出す
 function y=interpolate(pc,of,data)
+% 計算誤差による微小な虚数成分や不整合を排除するため実数に変換する
+pc = real(pc);
+of = real(of);
 %CEAの燃焼室圧のサンプリングレート
 sample.pc=[0.004,0.01,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0].*(10^6);
 %CEAのO/F比のサンプリングレート

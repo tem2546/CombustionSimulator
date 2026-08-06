@@ -99,7 +99,7 @@ classdef BaseSystem
             end_i = Class.output.origin.end_i;           %燃焼終了時のindex
 
             %圧力履歴の格納. 可能な場合はスパイクのずれを修正.
-            Class = Tank_Chamber_History(Class);
+            Class = Tank_Chamber_History(Class, gs);
             %推力データのノイズを除去.
             removed_thrust = (medfilt1(thrust,3) + ...
                 medfilt1(thrust,8))/2;%ノイズ除去(平滑化)した推力データ
@@ -192,7 +192,7 @@ classdef BaseSystem
         end
 
         %タンク圧・燃焼室圧履歴による情報を格納する関数.
-        function Class = Tank_Chamber_History(Class)
+        function Class = Tank_Chamber_History(Class, gs)
             %必要な情報の読み込み
             %最大推力のindex
             max_i = Class.output.origin.max_i;
@@ -212,12 +212,20 @@ classdef BaseSystem
 
                 if(error_i == 0)
                     modifications = "No";
+                    disp('スパイクのずれを修正しません。')
                 elseif(isfield(Class.choice,'modifications'))
                     modifications = Class.choice.modifications;
                 else
-                    question = strcat('推力のスパイクに対し燃焼室圧力のスパイクに', ...
-                        num2str(error_spike),'[s]のずれがあります。修正しますか？');
-                    modifications = questdlg(question,'Error of Spike',"Yes","No","Yes");
+                    % question = strcat('推力のスパイクに対し燃焼室圧力のスパイクに', ...
+                    %     num2str(error_spike),'[s]のずれがあります。修正しますか？');
+                    % modifications = questdlg(question,'Error of Spike',"Yes","No","Yes");
+                    modifications = gs.spikecut;
+                    disp(string(modifications))
+                    if(string(modifications) == 'Yes')
+                        disp('スパイクのずれを修正します。')
+                    elseif(string(modifications) == 'No')
+                        disp('スパイクのずれを修正しません。')
+                    end
                 end
 
                 %ずれ修正

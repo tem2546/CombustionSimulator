@@ -37,12 +37,11 @@ function Combustion_Simulator()
     tic
     switch mode
         case 1
-            obj = Mode1_Organize_data();
-            obj.run(gs);
+            Mode1_Organize_data().run(gs);
         case 2
             Mode2_Compare_data().run(gs);
         case 3
-            Mode3_CEA_GUI().run(gs);
+            Mode3_CEA_GUI().run(gs);ose
         case 4
             Mode4_Analyze_HomebrewEngine().run(gs);
         case 5
