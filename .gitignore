@@ -16,7 +16,6 @@ settings.json
 *.csv
 *.inp
 *.out
-*.exe
 *.txt
 *.bat
 *.htm
