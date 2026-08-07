@@ -105,6 +105,7 @@ classdef Mode2_Compare_data < BaseSystem
             graph.pc = "No";
             graph.thrust = "No";
             
+
             for ind = 1:Class.datanum
                 fieldname = strcat("engine", num2str(ind));
                 Class.info.(fieldname).thrustdate = num2str(Class.info.(fieldname).thrustdate);
@@ -138,19 +139,48 @@ classdef Mode2_Compare_data < BaseSystem
             indx = 1:3;
             
             for i = 1:length(indx)
-                figure
-                hold on
+                % figure
+                % hold on
+                % for ind = 1:Class.datanum
+                %     fieldname = strcat("engine", num2str(ind));
+                %     plot(Class.history.(fieldname).t, ...
+                %         Class.history.(fieldname).(graph_list(indx(i))))
+                % end
+                % title(title_list(indx(i)))
+                % xlabel('時間[s]')
+                % ylabel(yaxis_list(indx(i)))
+                % legend(label)
+                % graph.(graph_list(indx(i))) = "Yes";
+                % hold off
+
+                target_field = graph_list(indx(i));
+                canPlot = true;
                 for ind = 1:Class.datanum
                     fieldname = strcat("engine", num2str(ind));
-                    plot(Class.history.(fieldname).t, ...
-                        Class.history.(fieldname).(graph_list(indx(i))))
+                    if ~isfield(Class.history.(fieldname), target_field)
+                        canPlot = false;
+                        break;
+                    end
                 end
-                title(title_list(indx(i)))
-                xlabel('時間[s]')
-                ylabel(yaxis_list(indx(i)))
-                legend(label)
-                graph.(graph_list(indx(i))) = "Yes";
-                hold off
+                
+                % 存在する場合のみグラフを描画する
+                if canPlot
+                    figure
+                    hold on
+                    for ind = 1:Class.datanum
+                        fieldname = strcat("engine", num2str(ind));
+                        plot(Class.history.(fieldname).t, ...
+                            Class.history.(fieldname).(target_field))
+                    end
+                    title(title_list(indx(i)))
+                    xlabel('時間[s]')
+                    ylabel(yaxis_list(indx(i)))
+                    legend(label)
+                    graph.(target_field) = "Yes";
+                    hold off
+                else
+                    disp([title_list{indx(i)} ' のデータが存在しないため、グラフの描画をスキップします。']);
+                end
             end
         end
         

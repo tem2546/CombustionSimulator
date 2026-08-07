@@ -63,9 +63,15 @@ classdef GeneralSetting < handle
         
         function launchUI(obj)
             root = fileparts(fileparts(obj.jsonPath));
-            pyScript = fullfile(root, 'Scripts', 'GeneralSettingUI', 'app.py');
+            % pyScript = fullfile(root, 'Scripts', 'GeneralSettingUI', 'app.py');
+            % settingsDir = fullfile(root, 'Settings');
+            % command = ['python "', pyScript, '" --settings-dir "', settingsDir, '"'];
+            % system(command);
+            % obj.load();
+            
+            exePath = fullfile(root, 'Scripts', 'GeneralSettingUI', 'dist', 'GeneralSettingUI.exe');
             settingsDir = fullfile(root, 'Settings');
-            command = ['python "', pyScript, '" --settings-dir "', settingsDir, '"'];
+            command = sprintf('"%s" --settings-dir "%s"', exePath, settingsDir);
             system(command);
             obj.load();
         end
