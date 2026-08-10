@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <title>General Settings UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="./assets/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+  <h1 data-i18n="app.title">全体設定 UI</h1>
+
+  <!-- 上部ツールバー -->
+  <div class="toolbar">
+    <button id="loadBtn" class="btn" data-i18n="toolbar.load" disabled>初期値を読み込む</button>
+    <button id="loadPreBtn" class="btn" data-i18n="toolbar.loadPre" disabled>前回設定を読み込み</button>
+    <button id="saveBtn" class="btn primary" data-i18n="toolbar.save" disabled>現在の設定を保存して終了</button>
+    <button id="saveAsBtn" class="btn" data-i18n="toolbar.saveAs" disabled>名前を付けて保存…</button>
+    <button id="openFileBtn" class="btn" data-i18n="toolbar.open" disabled>設定ファイルを開く…</button>
+    <button id="langToggle" class="btn lang" type="button">English</button>
+    <span id="msg" class="status mono"></span>
+  </div>
+
+  <!-- モード選択 -->
+  <div class="mode-selector-container">
+    <label class="modeSelect" data-i18n="mode.select_label">設定するモードを選択してください:</label>
+    <select class="modeSelect-option" id="modeSelect">
+      <option value="mode1">1. データ整理</option>
+      <option value="mode2">2. データ比較（複数データ整理）</option>
+      <option value="mode3">3. CEA_GUI</option>
+      <option value="mode4">4. 自作エンジン解析（4パラメータ同定）</option>
+      <option value="mode5">5. エンジンパラメータ設計</option>
+    </select>
+  </div>
+
+  <!-- 実行モード選択（一つだけ選択可能） -->
+  <div class="exec-mode-container">
+    <label class="exec-mode-title">実行するモードを選択してください:</label>
+    <div class="exec-mode-options">
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="1" checked> 1. データ整理
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="2"> 2. データ比較
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="3"> 3. CEA_GUI
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="4"> 4. 自作エンジン解析
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="execution_mode" value="5"> 5. エンジンパラメータ設計
+      </label>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="left">
+
+      <!-- データ整理モード -->
+      <div id="panel_mode1" class="mode-panel">
+        <fieldset>
+          <legend>1. データ整理 モード</legend>
+          
+          <!-- 推力履歴データの選択 -->
+          <div class="field">
+            <div class="field-head">
+              <label data-i18n="model.thrust">推力履歴データ (.xlsx/.csv/.txt)</label>
+            </div>
+            <div class="filerow">
+              <button id="pickThrustBtn" class="btn" data-i18n="model.pickThrust">推力履歴を選択</button>
+              <span id="thrust_fn_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+
+          <!-- ノイズ除去実行の選択 -->
+          <div class="field">
+            <div class="field-head">
+              <label for="noiseremoved">ノイズ除去の実行</label>
+            </div>
+            <select id="noiseremoved">
+              <option value="Yes">Yes（ノイズ除去を行った結果も表示）</option>
+              <option value="No">No（ノイズ除去をしない）</option>
+            </select>
+            <span class="note">推力データ全体の移動平均などのノイズ処理を行うか選択します。</span>
+          </div>
+
+          <!-- スパイクカット実行の選択 -->
+          <div class="field">
+            <div class="field-head">
+              <label for="spikecut">スパイクカットの実行</label>
+            </div>
+            <select id="spikecut">
+              <option value="Yes">Yes（異常な突出値を除去）</option>
+              <option value="No">No（スパイクカットをしない）</option>
+            </select>
+            <span class="note">センサーの異常値（スパイクノイズ）を自動カットするか選択します。</span>
+          </div>
+
+          <!-- csvファイル出力の選択 -->
+          <div class="field">
+            <div class="field-head">
+              <label for="csvout">CSVファイル出力</label>
+            </div>
+            <select id="csvout">
+              <option value="Yes">Yes（整理後の推力履歴をCSV保存する）</option>
+              <option value="No">No（CSV保存しない）</option>
+            </select>
+            <span class="note">処理したデータを「Output」フォルダにCSV形式で書き出すか選択します。</span>
+          </div>
+
+          <div class="field">
+            <div class="field-head">
+              <label>燃料残留時間の算出</label>
+            </div>
+            <div class="filerow">
+              <select id="calc_residual_time">
+                <option value="Yes">計算する (Yes)</option>
+                <option value="No">計算しない (No)</option>
+              </select>
+            </div>
+          </div>
+
+        </fieldset>
+      </div>
+
+      <!-- データ比較モード -->
+      <div id="panel_mode2" class="mode-panel">
+        <fieldset>
+          <legend>データ比較モード</legend>
+
+          <!-- 比較データ数 -->
+          <div class="field">
+            <div class="field-head">
+              <label>比較するデータ数</label>
+            </div>
+            <div class="filerow">
+              <select id="compareDataNumSelect">
+                <option value="2">2機</option>
+                <option value="3">3機</option>
+                <option value="custom">その他 (手動入力)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- データ数入力 -->
+          <div id="custom_datanum_row" class="field" class="field">
+            <div class="field-head">
+              <label>データ数を直接入力</label>
+            </div>
+            <div class="filerow">
+              <input type="number" id="customDataNumInput">
+            </div>
+          </div>
+
+          <!-- 推力、燃焼室圧スパイクの同期 -->
+          <div class="field">
+            <div class="field-head">
+              <label>推力・燃焼室圧スパイクの同期</label>
+            </div>
+            <div class="filerow">
+              <select id="compare_sync_spike">
+                <option value="Yes">ズレがある場合は修正する (Yes)</option>
+                <option value="No">修正しない (No)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 出力するグラフ -->
+          <!-- <div class="field">
+            <div class="field-head">
+              <label>比較出力するグラフ（複数選択可）</label>
+            </div>
+            <div class="filerow" style="flex-direction: column; align-items: flex-start; gap: 6px; padding-left: 4px;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="compare_graph_thrust" checked> <span>推力 (thrust)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" id="compare_graph_removed"> <span>ノイズ除去後推力 (removed_thrust)</span>
+              </label>
+            </div>
+          </div> -->
+
+          <!-- 比較データファイル -->
+          <div class="field">
+            <div class="field-head">
+              <label>比較対象データファイル (.xlsx)</label>
+            </div>
+            <div class="filerow compare-filerow">
+              
+              <div class="compare-clear-wrapper">
+                <button id="clearCompareFilesBtn" class="btn btn-danger">全選択をクリア</button>
+              </div>
+
+              <div id="compare_dynamic_grid" class="compare-dynamic-grid"></div>
+
+            </div>
+        </fieldset>
+      </div>
+
+      <!-- CEA_GUIモード -->
+      <div id="panel_mode3" class="mode-panel">
+        <fieldset>
+          <legend>3. CEA_GUI モード</legend>
+          <div class="cea-form-grid">
+            <div class="form-group">
+              <label for="m3_fuel_select">燃料:</label>
+              <input type="text" id="m3_fuel_select" value="PP">
+            </div>
+            <div class="form-group">
+              <label for="m3_oxidant_select">酸化剤:</label>
+              <input type="text" id="m3_oxidant_select" value="N2O">
+            </div>
+            <div class="form-group">
+              <label for="m3_hkj">h, kj/mol: 生成エンタルピー</label>
+              <input type="number" id="m3_hkj" value="-713.01204" step="any">
+            </div>
+            <div class="form-group">
+              <label for="m3_c_atom">C: 分子内の炭素原子の数</label>
+              <input type="number" id="m3_c_atom" value="30">
+            </div>
+            <div class="form-group">
+              <label for="m3_o_atom">O: 分子内の酸素原子の数</label>
+              <input type="number" id="m3_o_atom" value="0">
+            </div>
+            <div class="form-group">
+              <label for="m3_h_atom">H: 分子内の水素原子の数</label>
+              <input type="number" id="m3_h_atom" value="60">
+            </div>
+            <div class="form-group">
+              <label for="m3_n_atom">N: 分子内の窒素原子の数</label>
+              <input type="number" id="m3_n_atom" value="0">
+            </div>
+            <div class="form-group">
+              <label for="m3_tk">t, k: 初期温度, 単位 k</label>
+              <input type="number" id="m3_tk" value="297">
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- 自作エンジン解析モード -->
+      <div id="panel_mode4" class="mode-panel">
+        <fieldset>
+          <legend>4. 自作エンジン解析 モード</legend>
+          <div class="analysis-form-grid">
+            <div class="form-group">
+              <label for="engine_select">解析するエンジン:</label>
+              <select id="m4_engine_select">
+                <option value="j-2i">j-2i</option>
+                <option value="j-3i">j-3i</option>
+                </select>
+            </div>
+
+            <!-- Mode4 推力ファイル選択部分のHTML例 -->
+            <div>
+              <label>推力データファイル (.xlsx):</label>
+              <div class="filerow">
+                <button type="button" id="m4_pick_thrust_btn" class="btn">ファイルを選択</button>
+                <span id="m4_thrust_fn_label" class="file-label">(未選択)</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="oxidant_select">③ 酸化剤:</label>
+              <select id="m4_oxidant_select">
+                <option value="N2O">N2O (亜酸化窒素)</option>
+                <option value="LOX">LOX (液体酸素)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="fuel_select">燃料:</label>
+              <select id="m4_fuel_select">
+                <option value="PP">PP (ポリプロピレン)</option>
+                <option value="PE">PE (ポリエチレン)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="m4_spikecut">スパイクカットの実行:</label>
+              <select id="m4_spikecut">
+                <option value="Yes">Yes（異常な突出値を除去）</option>
+                <option value="No">No（スパイクカットをしない）</option>
+              </select>
+              <span class="note">推力のスパイクと燃焼室圧力のスパイクのずれを修正するか選択してください。</span>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- エンジンパラメータ設計モード -->
+      <div id="panel_mode5" class="mode-panel">
+        <fieldset>
+          <legend>5. エンジンパラメータ設計 モード</legend>
+          <div class="design-container">
+            
+            <div class="design-left-col">
+              <h4>要求仕様 & 推進薬設定</h4>
+              
+              <div class="design-field">
+                <label>酸化剤選択:</label>
+                <select id="m5_oxidant_select">
+                  <option value="N2O">N2O (亜酸化窒素)</option>
+                </select>
+              </div>
+
+              <div class="design-field">
+                <label>燃料選択:</label>
+                <select id="m5_fuel_select">
+                  <option value="PP">PP</option>
+                  <option value="PE">PE</option>
+                  <option value="PE">ABS</option>
+                </select>
+              </div>
+
+              <div class="design-field">
+                <label for="m5_F_req">要求推力 \(F_{\text{req}}\) [N]:</label>
+                <input type="number" id="m5_F_req" value="250">
+              </div>
+
+              <div class="design-field">
+                <label for="m5_I_req">要求トータルインパルス \(I_{\text{req}}\) [Ns]:</label>
+                <input type="number" id="m5_I_req" value="1500">
+              </div>
+
+              <div class="design-field">
+                <label for="m5_vt">タンク容積 \(V_\text{t}\) [cc]:</label>
+                <input type="number" id="m5_vt" value="2000">
+              </div>
+            </div>
+
+            <!-- <div class="design-right-col" style="background: #fbfdff; padding: 10px; border-radius: 4px; border: 1px solid #bce0ff;">
+              <h4 style="margin-top: 0; color: #004494; border-bottom: 2px solid #9ecfff; padding-bottom: 3px;">② 供給系・幾何学パラメータ</h4>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                  <label for="m5_pti" style="display:block; font-weight:bold; font-size:0.85em;">初期タンク圧 \(P_{\text{t,init}}\) [MPa]:</label>
+                  <input type="number" id="m5_pti" value="5.0" step="0.1">
+                </div>
+                <div>
+                  <label for="m5_cstar_eff" style="display:block; font-weight:bold; font-size:0.85em;">特性排気速度効率 \(c^*\):</label>
+                  <input type="number" id="m5_cstar_eff" value="0.85" step="0.01">
+                </div>
+                <div>
+                  <label for="m5_Cd" style="display:block; font-weight:bold; font-size:0.85em;">オリフィス流量係数 \(C_\text{d}\):</label>
+                  <input type="number" id="m5_Cd" value="0.7" step="0.01">
+                </div>
+                <div>
+                  <label for="m5_do" style="display:block; font-weight:bold; font-size:0.85em;">オリフィス径 \(d_\text{o}\) [mm]:</label>
+                  <input type="number" id="m5_do" value="3.5" step="0.1">
+                </div>
+                <div>
+                  <label for="m5_df" style="display:block; font-weight:bold; font-size:0.85em;">初期ポート径 \(d_{\text{f,init}}\) [mm]:</label>
+                  <input type="number" id="m5_df" value="15">
+                </div>
+                <div>
+                  <label for="m5_Df_outer" style="display:block; font-weight:bold; font-size:0.85em;">燃料外径 \(D_\text{f}\) [mm]:</label>
+                  <input type="number" id="m5_Df_outer" value="50">
+                </div>
+                <div>
+                  <label for="m5_Lf_max" style="display:block; font-weight:bold; font-size:0.85em;">最大燃料長さ \(L_{\text{f,max}}\) [m]:</label>
+                  <input type="number" id="m5_Lf_max" value="0.5" step="0.05">
+                </div>
+                <div>
+                  <label for="m5_Lstar" style="display:block; font-weight:bold; font-size:0.85em;">必要特性長 \(L^*\) [m]:</label>
+                  <input type="number" id="m5_Lstar" value="2.0" step="0.1">
+                </div>
+              </div>
+            </div> -->
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- すべてのモードの共通部分 -->
+      <div id="panel_output" class="common-panel">
+        <fieldset class="output-fieldset">
+          <legend class="output-legend">出力設定</legend>
+
+          <div class="field">
+            <div class="field-head">
+              <label for="outputModeSelect">保存先モード</label>
+            </div>
+            <select id="outputModeSelect" class="output-mode-select">
+              <option value="auto">自動（デフォルトの Output フォルダ）</option>
+              <option value="manual">手動（保存先を自分で指定する）</option>
+            </select>
+          </div>
+
+          <div id="manual_path_row" class="field">
+            <div class="field-head">
+              <label>出力先フォルダ</label>
+            </div>
+            <div class="filerow">
+              <button id="pickDirBtn" class="btn">保存先フォルダを選択</button>
+              <span id="result_path_label" class="file-label">(未選択)</span>
+            </div>
+          </div>
+
+        </fieldset>
+        <div style="height: 60px; clear: both;"></div>
+      </div>
+
+  
+    </div>
+  </div>
+  <!-- スクリプト読み込み（ビルド方法に応じてパスを調整） -->
+  <script type="module" src="./js/app.js" defer></script>
+
+
+</body>
+</html>

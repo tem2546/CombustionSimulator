@@ -63,16 +63,24 @@ classdef GeneralSetting < handle
         
         function launchUI(obj)
             root = fileparts(fileparts(obj.jsonPath));
-            % pyScript = fullfile(root, 'Scripts', 'GeneralSettingUI', 'app.py');
-            % settingsDir = fullfile(root, 'Settings');
-            % command = ['python "', pyScript, '" --settings-dir "', settingsDir, '"'];
-            % system(command);
-            % obj.load();
-            
-            exePath = fullfile(root, 'Scripts', 'GeneralSettingUI', 'dist', 'GeneralSettingUI.exe');
+
+            % onedir build: exe lives in its own subfolder alongside its
+            % libraries (dist/GeneralSettingUI/GeneralSettingUI.exe), not
+            % directly under dist/ as with the old --onefile build.
+            exePath = fullfile(root, 'Scripts', 'GeneralSettingUI', 'dist', 'GeneralSettingUI', 'GeneralSettingUI.exe');
+            if ~exist(exePath, 'file')
+                error('GeneralSetting:exeNotFound', ...
+                    'GeneralSettingUI.exe が見つかりません: %s\nビルドしてください (Scripts/GeneralSettingUI 内で pyinstaller --noconfirm GeneralSettingUI.spec)。', exePath);
+            end
+
             settingsDir = fullfile(root, 'Settings');
             command = sprintf('"%s" --settings-dir "%s"', exePath, settingsDir);
-            system(command);
+            [status, cmdout] = system(command);
+            if status ~= 0
+                error('GeneralSetting:launchFailed', ...
+                    'GeneralSettingUI.exe の起動に失敗しました (exit code %d)。\n%s\nログを確認してください: %s', ...
+                    status, cmdout, fullfile(root, 'GeneralSettingUI.log'));
+            end
             obj.load();
         end
         
