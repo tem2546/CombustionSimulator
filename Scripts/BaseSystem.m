@@ -264,7 +264,6 @@ classdef BaseSystem
             %近似の曲線の傾きの最小値
             [LineA,Index] = min(DifCurve);
 
-            % disp(LineA, CurveX(Index));
             %液体残量時間決定のための直線を計算
             LineY = polyval(CurveP,CurveX(Index));
             LineB = LineY - LineA*CurveX(Index);

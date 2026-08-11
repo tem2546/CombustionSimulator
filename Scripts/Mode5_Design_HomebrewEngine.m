@@ -48,6 +48,11 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
 
             %燃料データ%燃料密度
             data.chamber.rho_f = table2array(Fueldata(choice.fuel,"密度[kg/m^3]"));%燃料密度
+
+            disp("==== rho_f DEBUG ====")%20260508のデバッグにて4行追加
+            disp(choice.fuel)
+            disp(Fueldata)
+            disp(data.chamber.rho_f)
         end
 
         %設計用ファイル読み込み
@@ -121,34 +126,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             end
         end
 
-        function pci = Calc_pci(ofi,pti,pci,cstar,gamma,pe,rho_ox,F_req,dp)
-            mdot_pi = 0;
-            mdot_pmin = 0;
-            while(mdot_pi <= mdot_pmin)
-                pci = pci - dp;
-                if(pci <= pe)
-                    pci = pci + dp;
-                    disp("現在の設定では必要最低流量を満たせません。" + ...
-                        newline + "初期燃焼室以外の設定を見直してください。" + ...
-                        newline + "要求推力の見直しも考慮に入れてください。");
-                    break;
-                end
-                %初期状態における特性排気速度と比熱比
-                cstari = interpolate(pci,ofi,cstar);
-                gammai = interpolate(pci,ofi,gamma);
-                %推力係数
-                Cfi = sqrt(2*gammai^2/(gammai - 1)* ...
-                    (2/(gammai + 1))^((gammai + 1)/(gammai - 1))* ...
-                    (1-(pe/pci)^((gammai - 1)/gammai)));
-                %必要最低流量
-                mdot_pmin = F_req/(Cfi*cstar_eff*cstari);
-                %供給系が必要最低流量を達成できるか。
-                mdot_oxi = Cd*pi/4*do^2*sqrt(2*rho_ox*(pti - pci));
-                mdot_pi = (1 + 1/ofi) * mdot_oxi;
-            end
-        end
 
-        function [initial,dt,cstar_eff,Cd,do,F_req] = Calc_Supply_System(cstar,gamma,pe,rho_ox,F_req)
+        function [initial,dthroat,cstar_eff,Cd,do,F_req] = Calc_Supply_System(cstar,gamma,pe,rho_ox,F_req)
 
             %初期O/F比の決定
             ofi = Mode5_Design_HomebrewEngine.Calc_of(cstar);
@@ -311,12 +290,12 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             disp(msg.Fi)
 
             %ノズルスロート径
-            dt = sqrt(4*cstar_eff*cstari*mdot_pi/(pi*pci));
-            msg.dt = strcat('ノズルスロート径推定最適値:',num2str(dt*10^3),'[mm]');
-            disp(msg.dt)
-            dt = round(dt*10^3,2)*10^(-3);
-            msg.dt = strcat('ノズルスロート径製造値:',num2str(dt*10^3),'[mm]');
-            disp(msg.dt)
+            dthroat = sqrt(4*cstar_eff*cstari*mdot_pi/(pi*pci));
+            msg.dthroat = strcat('ノズルスロート径推定最適値:',num2str(dthroat*10^3),'[mm]');
+            disp(msg.dthroat)
+            dthroat = round(dthroat*10^3,2)*10^(-3);
+            msg.dthroat = strcat('ノズルスロート径製造値:',num2str(dthroat*10^3),'[mm]');
+            disp(msg.dthroat)
             %開口比
             Epsilon = ((2/(gammai + 1))^(1/(gammai - 1))*(pci/pe)^(1/gammai))/ ...
                 sqrt((gammai + 1)/(gammai - 1)*(1 - (pe/pci)^((gammai - 1)/gammai)));
@@ -324,7 +303,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             disp(msg.Epsilon)
 
             %ノズル出口径
-            de = round(dt*sqrt(Epsilon)*10^3,2)*10^(-3);
+            de = round(dthroat*sqrt(Epsilon)*10^3,2)*10^(-3);
             msg.de = strcat('ノズル出口径製造値:',num2str(de*10^3),'[mm]');
             disp(msg.de)
 
@@ -338,9 +317,80 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             initial.Cf = Cfi;
             initial.mdot_ox = mdot_oxi;
             initial.mdot_p = mdot_pi;
+            initial.dthroat = dthroat;
+        end
+        
+        function [initial,dthroat] = Recalc_Supply_System(cstar,gamma,pe,rho_ox,F_req,initial,cstar_eff,Cd,do)
+
+        % 補正済みのO/Fと、既に決まっている初期タンク圧を使用する
+        ofi = initial.of;
+        pti = initial.pt;
+
+        disp(strcat('再計算に使用する初期O/F比：', num2str(ofi)));
+        disp(strcat('再計算に使用する初期タンク圧力：', num2str(pti*10^(-6)), '[MPa]'));
+
+        % 初期燃焼室圧力をタンク圧から探索開始
+        pci = pti;
+
+        mdot_pi = 0;
+        mdot_pmin = 0;
+
+        while(mdot_pi <= mdot_pmin)
+            pci = pci - 10^3;
+
+            if(pci <= pe)
+                error("O/F補正後の供給系再計算に失敗しました。現在の設定では必要最低流量を満たせません。");
+            end
+
+            % 初期状態における特性排気速度と比熱比
+            cstari = interpolate(pci,ofi,cstar);
+            gammai = interpolate(pci,ofi,gamma);
+
+            % 推力係数
+            Cfi = sqrt(2*gammai^2/(gammai - 1)* ...
+                (2/(gammai + 1))^((gammai + 1)/(gammai - 1))* ...
+                (1-(pe/pci)^((gammai - 1)/gammai)));
+
+            % 必要最低推進剤流量
+            mdot_pmin = F_req/(Cfi*cstar_eff*cstari);
+
+            % 供給可能な酸化剤流量・推進剤流量
+            mdot_oxi = Cd*pi/4*do^2*sqrt(2*rho_ox*(pti - pci));
+            mdot_pi = (1 + 1/ofi) * mdot_oxi;
         end
 
-        function [df,dfs,a,n,dt,Lf] = Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df)
+        % 初期推力
+        Fi = Cfi*cstar_eff*cstari*mdot_pi;
+
+        % ノズルスロート径
+        dthroat = sqrt(4*cstar_eff*cstari*mdot_pi/(pi*pci));
+        dthroat = round(dthroat*10^3,2)*10^(-3);
+
+        % 結果表示
+        disp(strcat('再計算後 初期特性排気速度：', num2str(cstari), '[m/s]'));
+        disp(strcat('再計算後 初期比熱比：', num2str(gammai)));
+        disp(strcat('再計算後 初期推力係数：', num2str(Cfi)));
+        disp(strcat('再計算後 初期燃焼室圧力：', num2str(pci*10^(-6)), '[MPa]'));
+        disp(strcat('再計算後 必要最低推進剤流量：', num2str(mdot_pmin), '[kg/s]'));
+        disp(strcat('再計算後 供給可能推進剤流量：', num2str(mdot_pi), '[kg/s]'));
+        disp(strcat('再計算後 初期推力：', num2str(Fi), '[N]'));
+        disp(strcat('再計算後 ノズルスロート径：', num2str(dthroat*10^3), '[mm]'));
+
+        % initialを更新
+        initial.F = Fi;
+        initial.cstar = cstari;
+        initial.gamma = gammai;
+        initial.of = ofi;
+        initial.pc = pci;
+        initial.pt = pti;
+        initial.Cf = Cfi;
+        initial.mdot_ox = mdot_oxi;
+        initial.mdot_p = mdot_pi;
+        initial.dthroat = dthroat;
+
+    end
+
+        function [df,dfs,a,n,time_step,Lf] = Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df)
             while(true)
 
                 %酸化剤流束係数
@@ -353,8 +403,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                 n=0.33;
 
                 %タイムサンプリングレート
-                dt=0.005;
-                i_max=round(planed_burning_time/dt);
+                time_step=0.005;
+                i_max=round(planed_burning_time/time_step);
 
                 %ポート径
                 dfs=zeros(i_max,1);
@@ -363,12 +413,15 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                     if(i==1)
                         dfs(i,1)=df;
                     else
-                        dfs(i,1)=rungekutta(dfs(i-1,1),ave.mdot_ox,a,n,dt);
+                        dfs(i,1)=rungekutta(dfs(i-1,1),ave.mdot_ox,a,n,time_step);
                     end
                 end
                 disp(strcat("最終ポート径",num2str(dfs(end,1)*10^3)))
                 %スライパ率
-                phi=(Df - dfs(end,1))/(Df - dfs(1,1))*100;
+                df_initial = dfs(1,1);
+                df_final = dfs(end,1);
+                df_outer = Df;
+                phi=(df_outer^2 - df_final^2)/(df_outer^2 - df_initial^2)*100;
                 msg.phi=strcat('スライパ率',num2str(phi),'%');
                 disp(msg.phi)
 
@@ -405,17 +458,22 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             while(true)
                 %以下燃料設計
                 %最終圧力推定
-                final_pt_predicted = initial.pc^2/initial.pt;
-                disp(strcat("最終タンク圧力[MPa]を",num2str(final_pt_predicted*10^(-6)),"MPa以上で設定してください。"))
+                final_pt_min = initial.pc^2/initial.pt;
+                disp(strcat("最終タンク圧力[MPa]を",num2str(final_pt_min*10^(-6)),"MPaより大きく設定してください。"))
                 final.pt=input('最終タンク圧力[MPa]:')*10^6;
+
+                while ~(isscalar(final.pt) && isreal(final.pt) && isfinite(final.pt) && final.pt > final_pt_min)
+                    disp("入力された最終タンク圧力では供給差圧を確保できません。");
+                    final.pt=input('最終タンク圧力[MPa]:')*10^6;
+                end
 
                 final.pc=initial.pc*sqrt(final.pt/initial.pt);
 
                 msg.final.pc=strcat('最終燃焼室圧力推定値：',num2str(final.pc*10^(-6)),'[MPa]');
                 disp(msg.final.pc)
 
-                if(final.pt < final.pc)
-                    disp("燃焼室圧がタンク圧を超えてしまいます。");
+                if(final.pt <= final.pc)
+                    error("最終タンク圧が最終燃焼室圧以下です。");
                 end
 
                 %平均圧力推定
@@ -454,12 +512,13 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                 Df = input('燃料外径[mm]：')*10^(-3);
 
                 %燃料長さ
-                [initial.df,dfs,a,n,dt,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df);
+                [initial.df,dfs,a,n,~,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df);
+                dthroat = initial.dthroat;
 
                 flag.Lfstar=true;
                 while(flag.Lfstar)
                     %必要最小燃料長さ
-                    Lf_min=Lstar_min*dt^2/initial.df^2;
+                    Lf_min=Lstar_min*dthroat^2/initial.df^2;
                     msg.Lf_min=strcat('必要最小燃料長さ：',num2str(Lf_min),'[m]');
                     disp(msg.Lf_min)
                     if(Lf_min > Lf_max)
@@ -467,12 +526,12 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                         disp(strcat('最大燃料長さ:',num2str(Lf_max),'[m]'));
                         disp(strcat('最小燃料長さ:',num2str(Lf_min),'[m]'));
                         %燃焼室特性長
-                        Lstar_min_predict = Lf_max * initial.df^2/dt^2;
+                        Lstar_min_predict = Lf_max * initial.df^2/dthroat^2;
                         disp(strcat('現在の初期ポート径だと燃焼室特性長が', ...
                             num2str(Lstar_min_predict), ...
                             '[m]未満じゃないと最大燃料長さを凌駕します。'));
                         %初期ポート径
-                        Initialof_predict = sqrt((Lstar_min * dt^2)/Lf_max);
+                        Initialof_predict = sqrt((Lstar_min * dthroat^2)/Lf_max);
                         disp(strcat('現在の燃焼室特性長だと初期ポート径が', ...
                             num2str(Initialof_predict*10^3), ...
                             '[mm]以上じゃないと最大燃料長さを凌駕します。'));
@@ -496,7 +555,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                         disp('燃料長さが必要最小燃料長さを下回っています。')
                         disp(strcat('最小燃料長さ:',num2str(Lf_min),'[m]'));
                         disp(strcat('燃料長さ:',num2str(Lf),'[m]'));
-                        Lstar_min_predict = Lf * initial.df^2/dt^2;
+                        Lstar_min_predict = Lf * initial.df^2/dthroat^2;
                         disp(strcat('現在の初期ポート径だと燃焼室特性長が', ...
                             num2str(Lstar_min_predict), ...
                             '[m]未満じゃないと必要最小燃料長さを下回ります。'));
@@ -515,19 +574,24 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                             msg.dfi=strcat('現在の初期ポート径：',num2str(initial.df*10^3),'[mm]');
                             disp(msg.dfi);
                             df=input('新しい初期ポート径[mm]：')*10^(-3);
-                            [initial.df,dfs,a,n,dt,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df);
+                            [initial.df,dfs,a,n,~,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df);
                         case "l"
                             option.Lfstar='y';
                             Lstar_min = input('必要な燃焼室特性長[m]:');
 
                         case "o"
-                            flag.Lfstar=0;
+                            flag.Lfstar = 0;
                             disp('O/F比を補正します。');
-                            initial.mdot_f=Lf_max*pi*initial.df*rho_f*a*(4*initial.mdot_ox/(pi*initial.df^2))^n;
-                            initial.of=initial.mdot_ox/initial.mdot_f;
+
+                            initial.mdot_f = Lf_max*pi*initial.df*rho_f*a*(4*initial.mdot_ox/(pi*initial.df^2))^n;
+                            initial.of = initial.mdot_ox/initial.mdot_f;
+
+                            disp(strcat('補正後の初期O/F比：', num2str(initial.of)));
+
                             disp('供給系の計算をやり直します。');
-                            [initial,dt] = Mode5_Design_HomebrewEngine.Calc_Supply_System(cstar,gamma,initial,pe,rho_ox,F_req,cstar_eff,Cd,do);
-                            disp('<供給系設計完了>');
+                            [initial,~] = Mode5_Design_HomebrewEngine.Recalc_Supply_System( ...
+                                cstar,gamma,pe,rho_ox,F_req,initial,cstar_eff,Cd,do);
+                            disp('<供給系再設計完了>');
                         case "end"
                             disp("全ての入力が完了しました。")
                             return;
@@ -551,6 +615,10 @@ rho_f = data.rho_f;     %燃料密度
 rho_ox = 852.2;         %酸化剤密度
 pe = 1.013*10^5;          %大気圧
 
+disp("===== DEBUG =====")
+disp(size(cstar))       %20260508のデバッグにて二行追加
+disp(size(gamma))
+
 %要求値設定
 %要求推力
 F_req = input('要求推力[N]:');
@@ -563,19 +631,47 @@ flag.req=1;
 while(flag.req==1)
     %供給系計算
     disp('<供給系設計開始>')
-    [initial,dthrougt,cstar_eff,Cd,do,F_req] = Mode5_Design_HomebrewEngine.Calc_Supply_System(cstar,gamma,pe,rho_ox,F_req);
+    [initial,~,cstar_eff,Cd,do,F_req] = Mode5_Design_HomebrewEngine.Calc_Supply_System(cstar,gamma,pe,rho_ox,F_req);
     disp('<供給系設計完了>');
 
     disp('<燃料系設計開始>')
     [initial,final,ave,planed_burning_time,dfs,Lf,a,n] = Mode5_Design_HomebrewEngine.Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do);
+    dthroat = initial.dthroat;
     disp('<燃料系設計完了>')
+   
+    disp('====final_p_DEBUG====') %20260508のデバッグにて10行追加
+    disp(final.pt)
+    disp(final.pc)
+    disp(final.pt - final.pc)
+    disp("==== mdot_f DEBUG ====")
+    disp(rho_f)
+    disp(Lf)
+    disp(dfs(end,1))
+    disp(a)
+    disp(n) %デバッグ行終わり
 
     %燃焼終了時の各質量流量
-    final.mdot_ox=Cd*pi/4*do^2*sqrt(2*rho_ox*(final.pt-final.pc));
+    deltaP_final = final.pt - final.pc;
+    if ~isreal(deltaP_final) || ~isfinite(deltaP_final) || deltaP_final <= 0
+        error("最終時刻の供給差圧が正ではありません。");
+    end
+    final.mdot_ox=Cd*pi/4*do^2*sqrt(2*rho_ox*deltaP_final);
     final.mdot_f=rho_f*Lf*pi*dfs(end,1)*a*(4*final.mdot_ox/(pi*dfs(end,1)^2))^n;
     final.mdot_p=final.mdot_ox+final.mdot_f;
 
+
+    disp("===== FLOW DEBUG =====")%20260508のデバッグにて5行追加
+    disp(final.mdot_ox)
+    disp(final.mdot_f)
+    disp(final.mdot_ox)
+    term = 4*final.mdot_ox/(pi*dfs(end,1)^2);
+    disp(term)%デバッグ行終わり
+
     final.of=final.mdot_ox/final.mdot_f;
+
+    disp("===== DEBUG =====") %20260508のデバッグにて2行追加
+    disp(final.of)
+    disp(final.pc)%デバッグ行終わり
 
     final.cstar=interpolate(final.pc,final.of,cstar);
     final.gamma=interpolate(final.pc,final.of,gamma);
@@ -683,7 +779,7 @@ parameters.n=n;                         %酸化剤流束指数
 
 parameters.cstar_eff=cstar_eff;         %特性排気速度効率
 parameters.pse=pe;                      %背圧
-parameters.dti=dthrougt;                %初期スロート径
+parameters.dti=dthroat;                %初期スロート径
 parameters.de=0.02;                     %ノズル出口径
 parameters.alpha=15;                    %ノズル半頂角
 parameters.ros=0;                       %エロ―ジョン速度
@@ -693,20 +789,20 @@ parameters.gamma=gamma;                 %比熱比
 end
 
 %runge-kutta法
-function dff=rungekutta(df1,mdot_ox,a,n,dt)
+function dff=rungekutta(df1,mdot_ox,a,n,time_step)
 %燃料後退速度式
 rdot=@(df)(2*a*(mdot_ox*4/(pi*df^2))^n);
 
 k1=rdot(df1);        %区間の最初における勾配
-df2=df1+k1*dt/2;
+df2=df1+k1*time_step/2;
 k2=rdot(df2);        %区間の中央における勾配の近似値
-df3=df1+k2*dt/2;
+df3=df1+k2*time_step/2;
 k3=rdot(df3);        %区間の中央における勾配の近似値
-df4=df1+k3*dt;
+df4=df1+k3*time_step;
 k4=rdot(df4);        %区間の最後における勾配の近似値
 
 %最終的な燃料ポート径
-dff=df1+(k1+2*k2+2*k3+k4)*dt/6;
+dff=df1+(k1+2*k2+2*k3+k4)*time_step/6;
 end
 
 %線形補間関数
@@ -716,15 +812,40 @@ sample.pc=[0.004,0.01,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.
 %CEAのO/F比のサンプリングレート
 sample.of=[0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,100];
 
-if(of>=100)         %O/F比が100を超える場合
-    o=fix(b/0.5);
-    f=rem(b,0.5);
-    y=((90-f-0.5*(o-20))*interp1(sample.pc,data(20,:),pc,'makima')+(f+0.5*(o-20))*interp1(sample.pc,data(21,:),pc,'makima'))/90;
-else                %O/F比が100未満
-    sample.data=zeros(1,length(sample.pc));
-    for i=1:length(sample.pc)
-        sample.data(i)=interp1(sample.of,data(:,i),of,'makima');
-    end
-    y=interp1(sample.pc,sample.data,pc,'makima');
+if ~isnumeric(pc) || ~isscalar(pc) || ~isreal(pc) || ~isfinite(pc)
+    error("CEA補間の燃焼室圧力pcが不正です。");
 end
+
+if ~isnumeric(of) || ~isscalar(of) || ~isreal(of) || ~isfinite(of)
+    error("CEA補間のO/Fが不正です。");
+end
+
+if ~isnumeric(data) || ~ismatrix(data)
+    error("CEA補間データが数値行列ではありません。");
+end
+
+if size(data,1) ~= length(sample.of) || size(data,2) ~= length(sample.pc)
+    error("CEA補間データのサイズがサンプル格子と一致しません。");
+end
+
+if ~isreal(data) || any(~isfinite(data(:)))
+    error("CEA補間データに非実数または非有限値が含まれています。");
+end
+
+if of < min(sample.of)
+    error("O/FがCEAテーブル下限を下回っています。");
+elseif of > max(sample.of)
+    warning('O/FがCEAテーブル上限の100を超えたため、O/F=100として補間します。');
+    of = max(sample.of);
+end
+
+if pc < min(sample.pc) || pc > max(sample.pc)
+    error("燃焼室圧力pcがCEAテーブル範囲外です。");
+end
+
+sample.data = zeros(1,length(sample.pc));
+for i = 1:length(sample.pc)
+    sample.data(i) = interp1(sample.of,data(:,i),of,'makima');
+end
+y = interp1(sample.pc,sample.data,pc,'makima');
 end
