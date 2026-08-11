@@ -19,10 +19,6 @@ classdef BaseSystem
     methods
         %データ読み込み関数(内部でInfile関数を呼び出す).
         function Class = Input(Class, gs)
-            disp(isprop(gs, 'thrust'))
-            disp(isfield(gs.thrust, 'path'))
-            disp(isfield(gs.thrust, 'fn'))
-            disp(isprop(gs, 'thrust') && isfield(gs.thrust, 'path') && isfield(gs.thrust, 'fn'))
             % gs.thrust の中にある path と fn を結合してフルパスを作る
             if isprop(gs, 'thrust') && isfield(gs.thrust, 'path') && isfield(gs.thrust, 'fn')
                 fullFilePath = fullfile(gs.thrust.path, gs.thrust.fn);

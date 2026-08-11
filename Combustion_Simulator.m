@@ -38,6 +38,7 @@ function Combustion_Simulator()
     switch mode
         case 1
             Mode1_Organize_data().run(gs);
+            
         case 2
             Mode2_Compare_data().run(gs);
         case 3
