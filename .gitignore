@@ -22,5 +22,6 @@ settings.json
 *.ja
 *.log
 *.spec
+*.asv
 Scripts/GeneralSettingUI/build/
 Scripts/GeneralSettingUI/__pycache__/
