@@ -47,19 +47,25 @@ classdef GeneralSetting < handle
     end
     
     methods
-        % コンストラクタを空にする
-        function obj = GeneralSetting()
+        % % コンストラクタを空にする
+        function obj = GeneralSetting(root)
+            % settings.jsonの絶対パスを作成
+            obj.jsonPath = fullfile(root, 'Settings', 'settings.json');
+
+            % Scriptsフォルダの絶対パスを作成
+            obj.scriptsPath = fullfile(root, 'Scripts');
+
         end
         
-        % settings.jsonの絶対パスを作成
-        function settingsPath(obj, root)
-            obj.jsonPath = fullfile(root, 'Settings', 'settings.json');
-        end
+        % % settings.jsonの絶対パスを作成
+        % function settingsPath(obj, root)
+        %     obj.jsonPath = fullfile(root, 'Settings', 'settings.json');
+        % end
 
-        % Scriptsフォルダの絶対パスを作成
-        function ScriptsPath(obj, root)
-            obj.scriptsPath = fullfile(root, 'Scripts');
-        end
+        % % Scriptsフォルダの絶対パスを作成
+        % function ScriptsPath(obj, root)
+        %     obj.scriptsPath = fullfile(root, 'Scripts');
+        % end
         
         function launchUI(obj)
             root = fileparts(fileparts(obj.jsonPath));

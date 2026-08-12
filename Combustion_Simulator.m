@@ -3,10 +3,10 @@ function Combustion_Simulator()
     [root, ~, ~] = fileparts(mfilename('fullpath'));
     
     % gsオブジェクトの作成と初期化
-    gs = GeneralSetting();
+    gs = GeneralSetting(root);
 
     % settings.jsonのパスを取得
-    gs.settingsPath(root);
+    % gs.settingsPath(root);
     gs.jsonPath; % ここで正確なパスを渡す
     
     % UI起動
@@ -33,7 +33,7 @@ function Combustion_Simulator()
     % old = pwd; % 今いるパスを保存
 
 
-    gs.ScriptsPath(root);
+    % gs.ScriptsPath(root);
     cd(gs.scriptsPath) % Scriptsパスに移動
     
     tic
