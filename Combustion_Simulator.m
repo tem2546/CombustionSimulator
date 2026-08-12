@@ -30,7 +30,9 @@ function Combustion_Simulator()
     
     fprintf('モード %d を実行します。\n', mode);
 
-    old = pwd; % 今いるパスを保存
+    % old = pwd; % 今いるパスを保存
+
+
     gs.ScriptsPath(root);
     cd(gs.scriptsPath) % Scriptsパスに移動
     
@@ -42,7 +44,7 @@ function Combustion_Simulator()
         case 2
             Mode2_Compare_data().run(gs);
         case 3
-            Mode3_CEA_GUI().run(gs);ose
+            Mode3_CEA_GUI().run(gs);
         case 4
             Mode4_Analyze_HomebrewEngine().run(gs);
         case 5
@@ -50,7 +52,7 @@ function Combustion_Simulator()
     end
     toc
 
-    cd(old) % 元のフォルダに戻る
+    cd(root) % 元のフォルダに戻る
     
     disp('終了');
 end
