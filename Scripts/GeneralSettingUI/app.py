@@ -1,8 +1,7 @@
-# app.py — HTTPサーバー＋Excel解析＋ダイアログ安定＋保存API
-import os, sys, json, argparse, shutil, mimetypes, math, logging, copy
+# app.py — HTTPサーバー＋ダイアログ安定＋保存API
+import os, sys, json, argparse, shutil, mimetypes, math, logging, copy, traceback
 import webview
 from datetime import datetime
-import pandas as pd
 
 # pywebview Windows バックエンドのネイティブオブジェクト走査エラーを抑制
 class _SuppressNativeWindowErrors(logging.Filter):
@@ -258,4 +257,10 @@ def main():
             log(f'post-start marker write failed: {e}')
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception:
+        # console=False build swallows tracebacks otherwise, making startup
+        # failures (e.g. missing WebView2 runtime) look like silent hangs.
+        log('FATAL startup exception:\n' + traceback.format_exc())
+        sys.exit(1)

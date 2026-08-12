@@ -1,7 +1,12 @@
-pyinstaller --noconfirm --onefile --windowed --name GeneralSettingUI ^
-  --icon assets/icon.ico ^
-  --add-data "index.html;." ^
-  --add-data "js;js" ^
-  --add-data "assets;assets" ^
-  --hidden-import openpyxl ^
-  app.py
+pyinstaller --noconfirm GeneralSettingUI.spec
+
+REM Old onefile invocation (kept for reference — switched to onedir via the
+REM .spec file because --onefile re-extracts the whole payload to a fresh
+REM %TEMP%\_MEIxxxxxx folder on every launch, which was slow and AV-flaky):
+REM pyinstaller --noconfirm --onefile --windowed --name GeneralSettingUI ^
+REM   --icon assets/icon.ico ^
+REM   --add-data "index.html;." ^
+REM   --add-data "js;js" ^
+REM   --add-data "assets;assets" ^
+REM   --hidden-import openpyxl ^
+REM   app.py
