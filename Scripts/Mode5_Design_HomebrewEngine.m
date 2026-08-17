@@ -634,13 +634,13 @@ disp(size(gamma))
 %要求値設定
 %要求推力
 F_req = gs.m5_F_req;
-disp('要求推力:', F_req, '[N]')
+disp(['要求推力:', F_req, '[N]'])
 %要求トータルインパルス
 I_req = gs.m5_I_req;
-disp('要求トータルインパルス:', I_req, '[Ns]')
+disp(['要求トータルインパルス:', I_req, '[Ns]'])
 %タンク容積
 vt = gs.m5_vt*10^(-6);
-disp('タンク容量:', vt, '[cc]')
+disp(['タンク容量:', vt, '[cc]'])
 
 flag.req=1;
 while(flag.req==1)
