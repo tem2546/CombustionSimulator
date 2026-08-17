@@ -145,15 +145,30 @@ async function bootstrap() {
   // 3. 現在の設定を保存して終了
   // ==========================================
   byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
-    // 全モードのデータをフラットにマージ
-    const payload = { 
-      ...safeCollectPayload(model),
+    const modelData = safeCollectPayload(model);
+    const mode4Data = safeCollectPayload(mode4);
+
+    const modelSpikecut = modelData.spikecut;
+    const mode4Spikecut = mode4Data.spikecut;
+
+    const rawPayload = { 
+      ...modelData,
       ...safeCollectPayload(mode2),
       ...safeCollectPayload(mode3),
-      ...safeCollectPayload(mode4),
+      ...mode4Data,
       ...safeCollectPayload(mode5),
       ...safeCollectPayload(output)
     };
+
+    // ご指定の条件分岐
+    const executionMode = rawPayload.execution_mode || "1";
+    if (executionMode === "1") {
+      rawPayload.spikecut = modelSpikecut;
+    } else {
+      rawPayload.spikecut = mode4Spikecut;
+    }
+
+    const payload = rawPayload;
 
     // 全モードの入力値バリデーションを実行
     const errs = [
@@ -179,15 +194,30 @@ async function bootstrap() {
   // 4. 名前を付けて保存
   // ==========================================
   byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
-    // 💡 修正：saveBtnと同様に、名前を付けて保存する場合もMode 3〜5のデータを含める
-    const payload = { 
-      ...safeCollectPayload(model),
+    const modelData = safeCollectPayload(model);
+    const mode4Data = safeCollectPayload(mode4);
+
+    const modelSpikecut = modelData.spikecut;
+    const mode4Spikecut = mode4Data.spikecut;
+
+    const rawPayload = { 
+      ...modelData,
       ...safeCollectPayload(mode2),
       ...safeCollectPayload(mode3),
-      ...safeCollectPayload(mode4),
+      ...mode4Data,
       ...safeCollectPayload(mode5),
       ...safeCollectPayload(output)
     };
+
+    // ご指定の条件分岐
+    const executionMode = rawPayload.execution_mode || "1";
+    if (executionMode === "1") {
+      rawPayload.spikecut = modelSpikecut;
+    } else {
+      rawPayload.spikecut = mode4Spikecut;
+    }
+
+    const payload = rawPayload;
     
     const errs = [
       ...safeCheckValidity(model, payload),

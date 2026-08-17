@@ -60,7 +60,7 @@ export class Mode4Settings {
       m4_engine_select: byId("m4_engine_select")?.value || "j-2i",
       m4_oxidant_select: byId("m4_oxidant_select")?.value || "N2O",
       m4_fuel_select: byId("m4_fuel_select")?.value || "PP",
-      spikecut: byId("m4_spikecut")?.value || "Yes",
+      m4_spikecut: byId("m4_spikecut")?.value || "Yes",
       // モード1などと同様に { fn, path } のオブジェクト構造で保存
       m4_thrust_file_select: s.m4_thrust_file_select || { fn: "", path: "" }
     };
@@ -71,7 +71,7 @@ export class Mode4Settings {
     setVal("m4_engine_select", data.m4_engine_select ?? "j-2i");
     setVal("m4_oxidant_select", data.m4_oxidant_select ?? "N2O");
     setVal("m4_fuel_select", data.m4_fuel_select ?? "PP");
-    setVal("m4_spikecut", data.spikecut ?? "Yes");
+    setVal("m4_spikecut", data.m4_spikecut ?? "Yes");
 
     if (data.m4_thrust_file_select) {
       this.store?.apply({ m4_thrust_file_select: data.m4_thrust_file_select });
