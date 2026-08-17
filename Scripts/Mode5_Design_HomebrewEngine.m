@@ -151,8 +151,9 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             %必要事項入力
             %初期タンク圧力の入力
             pti = input('初期タンク圧力[MPa]:')*10^6;
-            %初期燃焼室圧力を仮決定
-            pci = pti;
+            %CEAテーブル上限を超えない位置から初期燃焼室圧力を探索
+            pressure_step = 10^3;
+            pci = Mode5_Design_HomebrewEngine.CeaSearchSeedPressure(pti,pressure_step);
             %特性排気速度効率の入力
             cstar_eff = input('特性排気速度効率:');
             %流量係数の決定
@@ -165,9 +166,9 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                 mdot_pi = 0;
                 mdot_pmin = 0;
                 while(mdot_pi <= mdot_pmin)
-                    pci = pci - 10^3;
+                    pci = pci - pressure_step;
                     if(pci <= pe)
-                        pci = pci + 10^3;
+                        pci = pci + pressure_step;
                         disp("現在の設定では必要最低流量を満たせません。" + ...
                             newline + "初期燃焼室以外の設定を見直してください。" + ...
                             newline + "要求推力の見直しも考慮に入れてください。");
@@ -230,9 +231,10 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                             while(mdot_pi <= mdot_pmin)
                                 F_req_temp = F_req_temp - 1;
                                 disp(F_req_temp);
-                                pci = pti;
+                                pressure_step_temp = 10^5;
+                                pci = Mode5_Design_HomebrewEngine.CeaSearchSeedPressure(pti,pressure_step_temp);
                                 while(mdot_pi <= mdot_pmin)
-                                    pci = pci - 10^5;
+                                    pci = pci - pressure_step_temp;
                                     if(pci <= pe)
                                         break;
                                     end
@@ -341,14 +343,15 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
         disp(strcat('再計算に使用する初期O/F比：', num2str(ofi)));
         disp(strcat('再計算に使用する初期タンク圧力：', num2str(pti*10^(-6)), '[MPa]'));
 
-        % 初期燃焼室圧力をタンク圧から探索開始
-        pci = pti;
+        % CEAテーブル上限を超えない位置から初期燃焼室圧力を探索
+        pressure_step = 10^3;
+        pci = Mode5_Design_HomebrewEngine.CeaSearchSeedPressure(pti,pressure_step);
 
         mdot_pi = 0;
         mdot_pmin = 0;
 
         while(mdot_pi <= mdot_pmin)
-            pci = pci - 10^3;
+            pci = pci - pressure_step;
 
             if(pci <= pe)
                 error("O/F補正後の供給系再計算に失敗しました。現在の設定では必要最低流量を満たせません。");
@@ -615,6 +618,25 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             end
         end
 
+        function pc_grid = CeaPressureGrid()
+            pc_grid = [0.004,0.01,0.2,0.4,0.6,0.8,1.0,1.2, ...
+                1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0].*(10^6);
+        end
+
+        function pci = CeaSearchSeedPressure(pti,pressure_step)
+            if ~isnumeric(pti) || ~isscalar(pti) || ~isreal(pti) || ~isfinite(pti)
+                error("初期タンク圧力ptiが不正です。");
+            end
+
+            if ~isnumeric(pressure_step) || ~isscalar(pressure_step) || ...
+                    ~isreal(pressure_step) || ~isfinite(pressure_step) || pressure_step <= 0
+                error("燃焼室圧力の探索刻みが不正です。");
+            end
+
+            pc_grid = Mode5_Design_HomebrewEngine.CeaPressureGrid();
+            pci = min(pti,max(pc_grid)+pressure_step);
+        end
+
     end
 end
 
@@ -841,7 +863,7 @@ end
 %線形補間関数
 function y=interpolate(pc,of,data)
 %CEAの燃焼室圧のサンプリングレート
-sample.pc=[0.004,0.01,0.2,0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.2,2.4,2.6,2.8,3.0].*(10^6);
+sample.pc=Mode5_Design_HomebrewEngine.CeaPressureGrid();
 %CEAのO/F比のサンプリングレート
 sample.of=[0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,7.5,8,8.5,9,9.5,10,100];
 
