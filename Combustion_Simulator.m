@@ -1,38 +1,58 @@
-clearvars;
-%CREATE自作燃焼シミュレータ
-%ver4.1.0からファイル名とファイル構成再編.
-%各種リスト。追加はココ
-list.mode={'データ整理','データ比較(複数データ整理)'...
-    ,'CEA_GUI','自作エンジン解析(4パラメータ同定)','エンジンパラメータ設計'...
-    };
-list.HyperTEK={'J-250'};
-list.engine={'J-2i','J-3i'};
-%酸化剤と燃料のリスト.
-list.oxidant={'N2O'}; list.fuel={'PE','PP','ABS'};
-%以下メインスクリプト
-%-----------------------------------------------------------------------------------------------------%
-cd('Scripts');
+function Combustion_Simulator()
+    % このファイルがあるディレクトリ（CombustionSimulatorフォルダ）を取得
+    [root, ~, ~] = fileparts(mfilename('fullpath'));
+    
+    % gsオブジェクトの作成と初期化
+    gs = GeneralSetting(root);
 
-%モードの選択
-[mode, tf] = listdlg('PromptString','モードを選択',...
-    'Name','Select mode','SelectionMode','Single',...
-    'ListString',list.mode);
-disp(strcat(list.mode(mode),'モードを実行します。'))
+    % settings.jsonのパスを取得
+    % gs.settingsPath(root);
+    gs.jsonPath; % ここで正確なパスを渡す
+    
+    % UI起動
+    gs.launchUI();
+    
+    %JSONを読み込む
+    gs.load();
 
-if tf
-    switch mode
-        case 1 %データ整理用
-            Class = Mode1_Organize_data().run();
-        case 2 %データ比較用
-            Class = Mode2_Compare_data().run();
-        case 3 %CEA_GUI操作用
-            Class = Mode3_CEA_GUI().run();
-        case 4 %自作エンジン解析用
-            Class = Mode4_Analyze_HomebrewEngine().run(list);
-        case 5 %自作エンジン設計用
-            Class = Mode5_Design_HomebrewEngine().run(list);        
+    choice = questdlg('シミュレーションを実行しますか？', ...
+        '実行確認', ...
+        '実行する', 'キャンセル', '実行する');
+    
+    if ~strcmp(choice, '実行する')
+        disp('シミュレーションをキャンセルしました。');
+        return; % ここで処理を終了する
     end
-end
+    
+    % 4. 実行 (Mode1などはパスが通っているので直接呼び出せる)
+    % mode = gs.execution_mode;
+    mode = double(string(gs.execution_mode));
+    
+    fprintf('モード %d を実行します。\n', mode);
 
-cd('../');
-disp('終了');
+    % old = pwd; % 今いるパスを保存
+
+
+    % gs.ScriptsPath(root);
+    cd(gs.scriptsPath) % Scriptsパスに移動
+    
+    tic
+    switch mode
+        case 1
+            Mode1_Organize_data().run(gs);
+            
+        case 2
+            Mode2_Compare_data().run(gs);
+        case 3
+            Mode3_CEA_GUI().run(gs);
+        case 4
+            Mode4_Analyze_HomebrewEngine().run(gs);
+        case 5
+            Mode5_Design_HomebrewEngine().run(gs);
+    end
+    toc
+
+    cd(root) % 元のフォルダに戻る
+    
+    disp('終了');
+end

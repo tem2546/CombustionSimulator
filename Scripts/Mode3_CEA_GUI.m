@@ -13,32 +13,44 @@ classdef Mode3_CEA_GUI
     methods
         %手続き関数.
         %main関数ではこれが呼び出される.
-        function Class = run(Class,~)
+        function Class = run(Class, gs)
             %.inpファイル生成のためのデータ取得.
             disp('CEAの入力ファイル作成操作を開始します。')
-            Class = Class.Input();
+            Class = Class.Input(gs);
             disp('CEAの入力ファイル作成操作が完了しました。')
             %FCEA2.exeの遠隔操作+ファイル抽出.
             disp('CEA.exeを実行します。')
-            Class = Class.CEA();
+            Class = Class.CEA(gs);
             disp('CEA_GUIモードが完了しました。')
         end
 
-        function Class = Input(Class)
+        function Class = Input(Class, gs)
             %入力ダイアログの生成.
-            prompt = {'燃料:','酸化剤:','h,kj/mol:','C:','O:','H:','N:','t,k:'};
-            dlgtitle = '入力';
-            def = {'PP','N2O','-713.01204','30','0','60','0','297'};
-            answ = inputdlg(prompt, dlgtitle, [1 40], def);
-            if isempty(answ); return; end
+            % prompt = {'燃料:','酸化剤:','h,kj/mol:','C:','O:','H:','N:','t,k:'};
+            % dlgtitle = '入力';
+            % def = {'PP','N2O','-713.01204','30','0','60','0','297'};
+            % answ = inputdlg(prompt, dlgtitle, [1 40], def);
+            % if isempty(answ); return; end
+
+            % UI(GeneralSetting) から設定値を直接取得する
+            fuel = string(gs.m3_fuel_select);
+            oxid = string(gs.m3_oxidant_select);
+            E    = string(gs.m3_hkj);
+            C    = string(gs.m3_c_atom);
+            O    = string(gs.m3_o_atom);
+            H    = string(gs.m3_h_atom);
+            N    = string(gs.m3_n_atom);
+            T    = string(gs.m3_tk);
+            answ = {fuel,oxid,E,C,O,H,N,T}';
+
             Class.filename = string(answ{1})+string(answ{2});
-            E = answ{3}; C = answ{4}; O = answ{5}; H = answ{6}; N = answ{7}; T = answ{8};
+            % E = answ{3}; C = answ{4}; O = answ{5}; H = answ{6}; N = answ{7}; T = answ{8};
             textTag  = ".inp";
 
             % 確認ダイアログ（Yes/No）
-            answer = questdlg(Class.filename + textTag + "を生成します。よろしいですか？", ...
-                "確認", "Yes", "No", "No");
-            if answer ~= "Yes"; return; end
+            % answer = questdlg(Class.filename + textTag + "を生成します。よろしいですか？", ...
+            %     "確認", "Yes", "No", "No");
+            % if answer ~= "Yes"; return; end
 
             % CEAText（C#の "    h,kj/mol=..." と同じ並び）
             ceaText = "    h,kj/mol=" + string(E) + "  C " + string(C) + ...
@@ -60,9 +72,11 @@ classdef Mode3_CEA_GUI
             fprintf(fid, "%s\n", "  fuel=" + string(answ{1}) +"  wt=100  t,k=" + string(T));
             fprintf(fid, "%s\n", ceaText);
             fprintf(fid, "%s\n", "end");
+
+            disp(Class.filename + textTag + " を生成しました。");
         end
 
-        function Class = CEA(Class)
+        function Class = CEA(Class, gs)
             cd('../CEAexec-win');
             command  = "cmd /c echo " + Class.filename + " | FCEA2.exe";
             system(command);
