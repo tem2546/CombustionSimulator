@@ -1,10 +1,10 @@
 // js/sections/mode3-settings.js
-import { byId, setVal } from "../core/dom.js";
+import { getVal, setVal } from "../core/dom.js";
 
 export class Mode3Settings {
+  // 初期化処理
   init(store) {
     this.store = store;
-    // 必要であればここでイベントリスナー等を初期化できます
   }
 
   // 初期デフォルト値の適用
@@ -22,14 +22,14 @@ export class Mode3Settings {
   // フォームからデータを一括収集（Mode2と同様にbyIdから直接確実に取得）
   collectPayload() {
     return {
-      m3_fuel_select: byId("m3_fuel_select")?.value || "PP",
-      m3_oxidant_select: byId("m3_oxidant_select")?.value || "N2O",
-      m3_hkj: parseFloat(byId("m3_hkj")?.value ?? -713.01204),
-      m3_c_atom: parseFloat(byId("m3_c_atom")?.value ?? 30),
-      m3_o_atom: parseFloat(byId("m3_o_atom")?.value ?? 0),
-      m3_h_atom: parseFloat(byId("m3_h_atom")?.value ?? 60),
-      m3_n_atom: parseFloat(byId("m3_n_atom")?.value ?? 0),
-      m3_tk: parseFloat(byId("m3_tk")?.value ?? 297)
+      m3_fuel_select: getVal("m3_fuel_select") || "PP",
+      m3_oxidant_select: getVal("m3_oxidant_select") || "N2O",
+      m3_hkj: parseFloat(getVal("m3_hkj") ?? -713.01204),
+      m3_c_atom: parseFloat(getVal("m3_c_atom") ?? 30),
+      m3_o_atom: parseFloat(getVal("m3_o_atom") ?? 0),
+      m3_h_atom: parseFloat(getVal("m3_h_atom") ?? 60),
+      m3_n_atom: parseFloat(getVal("m3_n_atom") ?? 0),
+      m3_tk: parseFloat(getVal("m3_tk") ?? 297)
     };
   }
 
@@ -49,7 +49,7 @@ export class Mode3Settings {
   // バリデーションチェック（Mode2のように安全な形、または一旦空にしてテスト）
   checkValidity(payload) {
     const errs = [];
-    if (byId("modeSelect")?.value === "mode3") {
+    if (getVal("modeSelect") === "3") {
       if (isNaN(payload.m3_hkj)) {
         errs.push("CEA: 比エンタルピーは数値で入力してください");
       }

@@ -1,5 +1,5 @@
 // js/sections/mode5-settings.js
-import { byId, setVal } from "../core/dom.js";
+import { byId, setVal, getVal } from "../core/dom.js";
 
 export class Mode5Settings {
   init(store) {
@@ -24,19 +24,19 @@ export class Mode5Settings {
 
   collectPayload() {
     return {
-      m5_oxidant_select: byId("m5_oxidant_select")?.value || "N2O",
-      m5_fuel_select: byId("m5_fuel_select")?.value || "PP",
-      m5_F_req: parseFloat(byId("m5_F_req")?.value) || 250,
-      m5_I_req: parseFloat(byId("m5_I_req")?.value) || 1500,
-      m5_vt: parseFloat(byId("m5_vt")?.value) || 2000,
-      m5_pti: parseFloat(byId("m5_pti")?.value) || 5.0,
-      m5_cstar_eff: parseFloat(byId("m5_cstar_eff")?.value) || 0.85,
-      m5_Cd: parseFloat(byId("m5_Cd")?.value) || 0.7,
-      m5_do: parseFloat(byId("m5_do")?.value) || 3.5,
-      m5_df: parseFloat(byId("m5_df")?.value) || 15,
-      m5_Df_outer: parseFloat(byId("m5_Df_outer")?.value) || 50,
-      m5_Lf_max: parseFloat(byId("m5_Lf_max")?.value) || 0.5,
-      m5_Lstar: parseFloat(byId("m5_Lstar")?.value) || 2.0
+      m5_oxidant_select: getVal("m5_oxidant_select") || "N2O",
+      m5_fuel_select: getVal("m5_fuel_select") || "PP",
+      m5_F_req: parseFloat(getVal("m5_F_req")) || 250,
+      m5_I_req: parseFloat(getVal("m5_I_req")) || 1500,
+      m5_vt: parseFloat(getVal("m5_vt")) || 2000,
+      m5_pti: parseFloat(getVal("m5_pti")) || 5.0,
+      m5_cstar_eff: parseFloat(getVal("m5_cstar_eff")) || 0.85,
+      m5_Cd: parseFloat(getVal("m5_Cd")) || 0.7,
+      m5_do: parseFloat(getVal("m5_do")) || 3.5,
+      m5_df: parseFloat(getVal("m5_df")) || 15,
+      m5_Df_outer: parseFloat(getVal("m5_Df_outer")) || 50,
+      m5_Lf_max: parseFloat(getVal("m5_Lf_max")) || 0.5,
+      m5_Lstar: parseFloat(getVal("m5_Lstar")) || 2.0
     };
   }
 
