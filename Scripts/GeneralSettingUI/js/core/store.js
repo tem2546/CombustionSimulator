@@ -3,7 +3,7 @@ export class SettingsStore {
   constructor() {
     this.defaults = {
       // 実行モード状態
-      modeSelect: "mode1",
+      modeSelect: "6",
 
       // モード1: データ整理パラメータ
       thrust: { fn: "", path: "" },

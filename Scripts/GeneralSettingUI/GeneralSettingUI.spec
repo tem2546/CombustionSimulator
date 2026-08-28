@@ -1,11 +1,19 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from pathlib import Path
+
+PROJECT_DIR = Path(SPECPATH)
+
 
 a = Analysis(
-    ['app.py'],
-    pathex=[],
+    [str(PROJECT_DIR / 'app.py')],
+    pathex=[str(PROJECT_DIR)],
     binaries=[],
-    datas=[('index.html', '.'), ('js', 'js'), ('assets', 'assets')],
+    datas=[
+        (str(PROJECT_DIR / 'index.html'), '.'),
+        (str(PROJECT_DIR / 'js'), 'js'),
+        (str(PROJECT_DIR / 'assets'), 'assets'),
+    ],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -29,7 +37,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     console=False,
     disable_windowed_traceback=False,
@@ -45,7 +53,7 @@ coll = COLLECT(
     a.binaries,
     a.datas,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     name='GeneralSettingUI',
 )

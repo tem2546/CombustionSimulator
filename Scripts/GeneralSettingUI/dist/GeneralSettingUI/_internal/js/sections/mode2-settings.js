@@ -13,7 +13,7 @@ export class Mode2Settings {
     // 現在の設定から、対象となる総台数を安全に取得するヘルパー
     this.getTargetDataNum = () => {
       if (numSelect?.value === "custom") {
-        return Math.max(2, parseInt(customInput?.value || "4", 10));
+        return Math.max(2, parseInt(customInput?.value || "4"));
       }
       return parseInt(numSelect?.value || "2", 10);
     };
@@ -97,21 +97,13 @@ export class Mode2Settings {
   }
 
   applyDefaults() {
-    const s = this.store.get();
-    
-    setVal("compareDataNumSelect", s.compareDataNumSelect || "2");
-    setVal("customDataNumInput", s.customDataNumInput || 4);
-    setVal("compare_sync_spike", s.compare_sync_spike || "Yes");
+    setVal("compareDataNumSelect", "2");
+    setVal("customDataNumInput", "4");
+    setVal("compare_sync_spike", "Yes");
+    byId("compare_graph_thrust").checked = true;
+    byId("compare_graph_removed").checked = false;
 
-    const graphs = s.compare_graphs || { thrust: true, removed_thrust: false };
-    const chkThrust = byId("compare_graph_thrust");
-    const chkRemoved = byId("compare_graph_removed");
-    if (chkThrust) chkThrust.checked = !!graphs.thrust;
-    if (chkRemoved) chkRemoved.checked = !!graphs.removed_thrust;
-
-    if (typeof this.renderDynamicUi === "function") {
-      this.renderDynamicUi();
-    }
+    this.renderDynamicUi();
   }
 
   collectPayload() {
@@ -130,11 +122,11 @@ export class Mode2Settings {
 
     return {
       compareDataNumSelect: byId("compareDataNumSelect")?.value || "2",
-      customDataNumInput: parseInt(byId("customDataNumInput")?.value || "4", 10),
+      customDataNumInput: parseInt(byId("customDataNumInput")?.value || "4"),
       compare_sync_spike: byId("compare_sync_spike")?.value || "Yes",
       compare_graphs: {
-        thrust: !!byId("compare_graph_thrust")?.checked,
-        removed_thrust: !!byId("compare_graph_removed")?.checked
+        thrust: byId("compare_graph_thrust")?.checked || true,
+        removed_thrust: byId("compare_graph_removed")?.checked || false
       },
       compare_files: packedFiles // 有効なファイル配列をMATLABへ送出
     };
@@ -142,7 +134,7 @@ export class Mode2Settings {
 
   checkValidity(payload) {
     const errs = [];
-    if (byId("modeSelect")?.value === "mode2") {
+    if (byId("modeSelect")?.value === "2") {
       const numSelect = payload.compareDataNumSelect;
       const targetNum = (numSelect === "custom") ? payload.customDataNumInput : parseInt(numSelect, 10);
       const chosenNum = (payload.compare_files || []).length;

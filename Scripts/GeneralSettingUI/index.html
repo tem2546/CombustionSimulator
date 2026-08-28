@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="./assets/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <!-- <script type="module" src="./js/app.js"></script> -->
 </head>
 <body>
 
@@ -27,41 +28,20 @@
   <div class="mode-selector-container">
     <label class="modeSelect" data-i18n="mode.select_label">設定するモードを選択してください:</label>
     <select class="modeSelect-option" id="modeSelect">
-      <option value="mode1">1. データ整理</option>
-      <option value="mode2">2. データ比較（複数データ整理）</option>
-      <option value="mode3">3. CEA_GUI</option>
-      <option value="mode4">4. 自作エンジン解析（4パラメータ同定）</option>
-      <option value="mode5">5. エンジンパラメータ設計</option>
+      <option value="1">1. データ整理</option>
+      <option value="2">2. データ比較（複数データ整理）</option>
+      <option value="3">3. CEA_GUI</option>
+      <option value="4">4. 自作エンジン解析（4パラメータ同定）</option>
+      <option value="5">5. エンジンパラメータ設計</option>
+      <option value="6" selected> モードを選択してください</option>
     </select>
-  </div>
-
-  <!-- 実行モード選択（一つだけ選択可能） -->
-  <div class="exec-mode-container">
-    <label class="exec-mode-title">実行するモードを選択してください:</label>
-    <div class="exec-mode-options">
-      <label class="radio-label">
-        <input type="radio" name="execution_mode" value="1" checked> 1. データ整理
-      </label>
-      <label class="radio-label">
-        <input type="radio" name="execution_mode" value="2"> 2. データ比較
-      </label>
-      <label class="radio-label">
-        <input type="radio" name="execution_mode" value="3"> 3. CEA_GUI
-      </label>
-      <label class="radio-label">
-        <input type="radio" name="execution_mode" value="4"> 4. 自作エンジン解析
-      </label>
-      <label class="radio-label">
-        <input type="radio" name="execution_mode" value="5"> 5. エンジンパラメータ設計
-      </label>
-    </div>
   </div>
 
   <div class="grid">
     <div class="left">
 
       <!-- データ整理モード -->
-      <div id="panel_mode1" class="mode-panel">
+      <div id="panel_mode1" class="mode-panel" hidden>
         <fieldset>
           <legend>1. データ整理 モード</legend>
           
@@ -128,7 +108,7 @@
       </div>
 
       <!-- データ比較モード -->
-      <div id="panel_mode2" class="mode-panel">
+      <div id="panel_mode2" class="mode-panel" hidden>
         <fieldset>
           <legend>データ比較モード</legend>
 
@@ -202,7 +182,7 @@
       </div>
 
       <!-- CEA_GUIモード -->
-      <div id="panel_mode3" class="mode-panel">
+      <div id="panel_mode3" class="mode-panel" hidden>
         <fieldset>
           <legend>3. CEA_GUI モード</legend>
           <div class="cea-form-grid">
@@ -243,7 +223,7 @@
       </div>
 
       <!-- 自作エンジン解析モード -->
-      <div id="panel_mode4" class="mode-panel">
+      <div id="panel_mode4" class="mode-panel" hidden>
         <fieldset>
           <legend>4. 自作エンジン解析 モード</legend>
           <div class="analysis-form-grid">
@@ -294,7 +274,7 @@
       </div>
 
       <!-- エンジンパラメータ設計モード -->
-      <div id="panel_mode5" class="mode-panel">
+      <div id="panel_mode5" class="mode-panel" hidden>
         <fieldset>
           <legend>5. エンジンパラメータ設計 モード</legend>
           <div class="design-container">

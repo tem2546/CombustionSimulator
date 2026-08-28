@@ -1,5 +1,14 @@
 // js/sections/mode4-settings.js
-import { byId, setVal } from "../core/dom.js";
+import { byId, setVal, getVal } from "../core/dom.js";
+
+const setLabel = (id, name) => {
+  setText(id, t("msg.selected", { name }) || `選択中: ${name}`);
+  byId(id)?.classList.add("selected");
+};
+const unsetLabel = (id) => {
+  setText(id, t("status.unselected") || "(未選択)");
+  byId(id)?.classList.remove("selected");
+};
 
 export class Mode4Settings {
   init(store) {
@@ -11,57 +20,39 @@ export class Mode4Settings {
       try {
         if (!window.pywebview?.api) return;
         const abs = await window.pywebview.api.open_file(
-          [{ description: "Excel Data", extensions: ["xlsx"] }], false
+          [{ description: "Data", extensions: ["xlsx"] }], false
         );
         if (!abs) return;
 
         const fname = abs.split(/[\\/]/).pop();
         const dir = abs.slice(0, -(fname.length + 1));
 
+        setLabel("m4_thrust_fn_label", fname);
         // ストアに選択されたファイルを保存
         this.store.apply({
           m4_thrust_file_select: { fn: fname, path: dir }
         });
-        this.updateFileLabel();
       } catch (err) {
         console.error(err);
       }
     });
-
-    this.updateFileLabel();
-  }
-
-  // ファイル名ラベルの表示を更新
-  updateFileLabel() {
-    const s = this.store?.get() || {};
-    const fileObj = s.m4_thrust_file_select;
-    const label = byId("m4_thrust_fn_label");
-    if (label) {
-      if (fileObj && fileObj.fn) {
-        label.innerHTML = `<span style="color: #28a745;">✔</span> <strong>${fileObj.fn}</strong>`;
-      } else {
-        label.textContent = "(未選択)";
-      }
-    }
   }
 
   applyDefaults() {
+    unsetLabel("m4_thrust_fn_label");
     setVal("m4_engine_select", "j-2i");
     setVal("m4_oxidant_select", "N2O");
     setVal("m4_fuel_select", "PP");
     setVal("m4_spikecut", "Yes");
-    this.store?.apply({ m4_thrust_file_select: { fn: "", path: "" } });
-    this.updateFileLabel();
   }
 
   collectPayload() {
-    const s = this.store?.get() || {};
+    const s = this.store.get();
     return {
-      m4_engine_select: byId("m4_engine_select")?.value || "j-2i",
-      m4_oxidant_select: byId("m4_oxidant_select")?.value || "N2O",
-      m4_fuel_select: byId("m4_fuel_select")?.value || "PP",
-      m4_spikecut: byId("m4_spikecut")?.value || "Yes",
-      // モード1などと同様に { fn, path } のオブジェクト構造で保存
+      m4_engine_select: getVal("m4_engine_select") || "j-2i",
+      m4_oxidant_select: getVal("m4_oxidant_select") || "N2O",
+      m4_fuel_select: getVal("m4_fuel_select") || "PP",
+      m4_spikecut: getVal("m4_spikecut") || "Yes",
       m4_thrust_file_select: s.m4_thrust_file_select || { fn: "", path: "" }
     };
   }
@@ -75,8 +66,8 @@ export class Mode4Settings {
 
     if (data.m4_thrust_file_select) {
       this.store?.apply({ m4_thrust_file_select: data.m4_thrust_file_select });
+      setLabel("m4_thrust_fn_label", data.m4_thrust_file_select.fn || "");
     }
-    this.updateFileLabel();
   }
 
   checkValidity(payload) {
