@@ -25,7 +25,7 @@ const allModes = [byId("panel_mode1"), byId("panel_mode2"), byId("panel_mode3"),
 function whenPywebviewReady() {
     if (window.pywebview?.api) return Promise.resolve();
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         const startedAt = Date.now();
         const checkReady = () => {
             if (window.pywebview?.api) {
@@ -33,13 +33,13 @@ function whenPywebviewReady() {
                 return;
             }
             if (Date.now() - startedAt >= 10000) {
-                resolve();
+                reject(new Error("pywebview API did not become ready"));
                 return;
             }
             window.setTimeout(checkReady, 50);
         };
 
-        window.addEventListener("py-ready", resolve, { once: true });
+        window.addEventListener("py-ready", checkReady, { once: true });
         checkReady();
     });
 }
