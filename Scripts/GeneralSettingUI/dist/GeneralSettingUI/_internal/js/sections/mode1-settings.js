@@ -49,6 +49,10 @@ export class Mode1Settings {
     setVal("calc_residual_time", "Yes");
   }
 
+  apply() {
+    applyDefaults();
+  }
+
   collectPayload() {
     const s = this.store.get();
 

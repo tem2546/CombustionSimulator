@@ -100,10 +100,14 @@ export class Mode2Settings {
     setVal("compareDataNumSelect", "2");
     setVal("customDataNumInput", "4");
     setVal("compare_sync_spike", "Yes");
-    byId("compare_graph_thrust").checked = true;
-    byId("compare_graph_removed").checked = false;
+    // byId("compare_graph_thrust").checked = true;
+    // byId("compare_graph_removed").checked = false;
 
     this.renderDynamicUi();
+  }
+
+  apply() {
+    applyDefaults();
   }
 
   collectPayload() {

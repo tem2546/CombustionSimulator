@@ -8,7 +8,7 @@ class _SuppressNativeWindowErrors(logging.Filter):
     def filter(self, record):
         return 'window.native' not in record.getMessage()
 
-logging.getLogger('pywebview').addFilter(_SuppressNativeWindowErrors())
+# logging.getLogger('pywebview').addFilter(_SuppressNativeWindowErrors())
 
 parser = argparse.ArgumentParser(description="General Settings UI (pywebview)")
 parser.add_argument("--settings-dir", type=str, default=None)

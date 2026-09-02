@@ -1,5 +1,6 @@
 // js/sections/mode4-settings.js
-import { byId, setVal, getVal } from "../core/dom.js";
+import { byId, setVal, getVal, setText } from "../core/dom.js";
+import { t } from "../core/i18n.js";
 
 const setLabel = (id, name) => {
   setText(id, t("msg.selected", { name }) || `選択中: ${name}`);
