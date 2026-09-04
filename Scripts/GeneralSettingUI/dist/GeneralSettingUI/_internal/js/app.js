@@ -51,6 +51,8 @@ function safeCheckValidity(section, payload) {
 function collectSelectedPayload() {
     const selectedMode = Number.parseInt(panelModeSelector.value);
 
+    console.log(selectedMode);
+
     if(selectedMode < 1 || selectedMode > modeSections.length) {
         console.warn("モードを選択してください");
         return output.collectPayload();
@@ -161,21 +163,21 @@ async function bootstrap() {
     byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
         const payload = collectSelectedPayload();
 
-        全モードの入力値バリデーションを実行
-        const errs = [
-          ...safeCheckValidity(mode1, payload),
-          ...safeCheckValidity(mode2, payload),
-          ...safeCheckValidity(mode3, payload),
-          ...safeCheckValidity(mode4, payload),
-          ...safeCheckValidity(mode5, payload),
-          ...safeCheckValidity(output, payload)
-        ];
+        // 全モードの入力値バリデーションを実行
+        // const errs = [
+        //   ...safeCheckValidity(mode1, payload),
+        //   ...safeCheckValidity(mode2, payload),
+        //   ...safeCheckValidity(mode3, payload),
+        //   ...safeCheckValidity(mode4, payload),
+        //   ...safeCheckValidity(mode5, payload),
+        //   ...safeCheckValidity(output, payload)
+        // ];
 
-        if (errs.length) {
-          const msg = byId("msg");
-          if (msg) msg.textContent = "エラー: " + errs.join(" / ");
-          return;
-        }
+        // if (errs.length) {
+        //   const msg = byId("msg");
+        //   if (msg) msg.textContent = "エラー: " + errs.join(" / ");
+        //   return;
+        // }
         
         // 💡 修正した Python側の save_settings APIを叩き、UIを閉じてMATLABへ制御を戻す
         await window.pywebview.api.save_settings(payload, "settings.json");
