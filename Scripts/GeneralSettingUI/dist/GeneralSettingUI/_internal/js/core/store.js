@@ -6,17 +6,36 @@ export class SettingsStore {
       modeSelect: "6",
 
       // モード1: データ整理パラメータ
-      thrust: { fn: "", path: "" },
-      noiseremoved: "No",
-      spikecut: "No",
-      csvout: "Yes",
-      // 【追加】モード4: 自作エンジン解析パラメータ
-      m4_engine_select: "EngineA",
-      m4_thrust_file_select: "",
+      m1_thrust: { fn: "", path: "" },
+      m1_noiseremoved: "No",
+      m1_spikecut: "No",
+      m1_csvout: "Yes",
+      m1_calc_residual_time: "Yes",
+
+      // モード2: CEA解析パラメータ
+      m2_compareDataNumSelect: "2",
+      m2_customDataNumInput: "4",
+      m2_compare_sync_spike: "Yes",
+      m2_compare_graphs: { thrust: true, removed_thrust: false },
+      m2_compare_files_dict: {},
+
+      // モード3: CEA解析パラメータ
+      m3_fuel_select: "PP",
+      m3_oxidant_select: "N2O",
+      m3_hkj: -713.01204,
+      m3_c_atom: 30,
+      m3_o_atom: 0,
+      m3_h_atom: 60,
+      m3_n_atom: 0,
+      m3_tk: 297,
+
+      // モード4: 自作エンジン解析パラメータ
+      m4_thrust: { fn: "", path: "" },
+      m4_engine_select: "j-2i",
       m4_oxidant_select: "N2O",
       m4_fuel_select: "PP",
 
-      // 【追加】モード5: エンジニアパラメータ設計パラメータ
+      // モード5: エンジニアパラメータ設計パラメータ
       m5_oxidant_select: "N2O",
       m5_fuel_select: "PP",
       m5_F_req: 250,
@@ -40,14 +59,13 @@ export class SettingsStore {
   }
 
   apply(data = {}) {
-    const deepKeys = ["thrust"];
-    const next = { ...this.state, ...data };
-    for (const k of deepKeys) {
-      if (data[k] && typeof data[k] === "object") {
-        next[k] = { ...(this.state[k] ?? {}), ...data[k] };
-      }
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      return this.state;
     }
-    this.state = next;
+    
+    for (const [key, value] of Object.entries(data)) {
+      this.set(key, value);
+    }
     return this.state;
   }
 
@@ -61,6 +79,10 @@ export class SettingsStore {
   }
 
   set(k, v) {
-    this.state[k] = v;
+    if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+      this.state[k] = { ...this.state[k], ...v };
+    } else {
+      this.state[k] = v;
+    }
   }
 }

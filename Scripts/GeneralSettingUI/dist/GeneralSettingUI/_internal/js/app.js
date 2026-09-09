@@ -22,6 +22,7 @@ const allSections = [...modeSections, output];
 const panelModeSelector = byId("modeSelect");
 const allModes = [byId("panel_mode1"), byId("panel_mode2"), byId("panel_mode3"), byId("panel_mode4"), byId("panel_mode5")];
 
+// pywebviewのAPIが利用可能になるまで待つ関数
 function whenPywebviewReady() {
     if (window.pywebview?.api) return Promise.resolve();
 
@@ -44,21 +45,24 @@ function whenPywebviewReady() {
     });
 }
 
-function safeCheckValidity(section, payload) {
-    return section?.checkValidity ? section.checkValidity(payload) : [];
-}
-
+// 収集したデータをまとめて返す関数
 function collectSelectedPayload() {
     const selectedMode = Number.parseInt(panelModeSelector.value);
-
-    console.log(selectedMode);
-
     if(selectedMode < 1 || selectedMode > modeSections.length) {
-        console.warn("モードを選択してください");
+        alert("モードを選択してください");
         return output.collectPayload();
     }
 
+    const errs = [ 
+        ...modeSections[selectedMode - 1].checkValidity(store.get()),
+        ...output.checkValidity(store.get())
+    ];
+    if (errs.length > 0) {
+        return { cancelled: true, errors: errs };
+    }
+
     return {
+        cancelled: false,
         modeSelect: selectedMode.toString(),
         execution_mode: selectedMode.toString(),
         ...modeSections[selectedMode - 1].collectPayload(),
@@ -66,19 +70,15 @@ function collectSelectedPayload() {
     };
 }
 
-// 💡 外部からデータを読み込んだときに、各クラスの画面反映メソッド (apply または applyDefaults) を安全に叩く関数
-function refreshAllSectionUi(defaults = false) {
+// 外部からデータを読み込んだときに、各クラスの画面反映メソッド (apply または applyDefaults) を安全に叩く関数
+function refreshAllSectionUi() {
     const currentStoreData = store.get();
-
-    requestAnimationFrame(() => {
-        if(defaults) allSections.forEach(sec => sec.applyDefaults());
-        else allSections.forEach(sec => sec.apply(currentStoreData));
-    });
+    requestAnimationFrame(() => allSections.forEach(sec => sec.apply(currentStoreData)));
 }
 
+// モード選択が変更されたときの処理
 function onModeChange() {
     const mode = panelModeSelector.value;
-    console.log(`Mode changed to: ${mode}`);
 
     allModes.forEach((modeEl, index) => {
         if (modeEl) {
@@ -93,24 +93,19 @@ async function bootstrap() {
     // ==========================================
     // 1. まずAPIの出現を待つ
     // ==========================================
-    console.log("Waiting for pywebview API to be ready...");
     await whenPywebviewReady();
-    console.log("pywebview API is ready.");
 
     // ==========================================
     // 2. 各セクションの初期化処理
     // ==========================================
     allSections.forEach(sec => sec.init(store));
-    refreshAllSectionUi(true);
-    console.log("All sections initialized.");
+    refreshAllSectionUi();
 
-    console.log("Initializing language settings...");
     initLang();
     const langBtn = byId("langToggle");
     if (langBtn) {
         langBtn.addEventListener("click", toggleLang);
     }
-    console.log("Language settings initialized.");
 
     // ==========================================
     // 3. 完全に準備が整ったので上部ツールバーのロックを解除
@@ -125,36 +120,36 @@ async function bootstrap() {
     const withLock = (btnId, callback) => {
         const btn = byId(btnId);
         return async () => {
-        if (!btn || btn.disabled) return;
-        btn.disabled = true;
-        try {
-            await callback();
-        } catch (err) {
-            console.error(err);
-        } finally {
-            btn.disabled = false;
-        }
+            if (!btn || btn.disabled) return;
+            btn.disabled = true;
+            try {
+                await callback();
+            } catch (err) {
+                console.error(err);
+            } finally {
+                btn.disabled = false;
+            }
         };
     };
-
-    console.log("UI is fully initialized and ready for user interaction.");
 
     // ==========================================
     // 1. 初期値を読み込む
     // ==========================================
     byId("loadBtn")?.addEventListener("click", withLock("loadBtn", async () => {
         store.resetToDefaults();
-        refreshAllSectionUi(true);
+        refreshAllSectionUi();
+        console.info("初期値を読み込みました。");
     }));
 
     // ==========================================
     // 2. 前回設定を読み込み
     // ==========================================
     byId("loadPreBtn")?.addEventListener("click", withLock("loadPreBtn", async () => {
-        const res = await window.pywebview.api.load_presettings();
+        const res = await window.pywebview.api.load_settings();
         if (!res?.ok) return;
         store.apply(res.data ?? {});
         refreshAllSectionUi();
+        console.info("前回設定を読み込みました。");
     }));
 
     // ==========================================
@@ -162,51 +157,24 @@ async function bootstrap() {
     // ==========================================
     byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
         const payload = collectSelectedPayload();
-
-        // 全モードの入力値バリデーションを実行
-        // const errs = [
-        //   ...safeCheckValidity(mode1, payload),
-        //   ...safeCheckValidity(mode2, payload),
-        //   ...safeCheckValidity(mode3, payload),
-        //   ...safeCheckValidity(mode4, payload),
-        //   ...safeCheckValidity(mode5, payload),
-        //   ...safeCheckValidity(output, payload)
-        // ];
-
-        // if (errs.length) {
-        //   const msg = byId("msg");
-        //   if (msg) msg.textContent = "エラー: " + errs.join(" / ");
-        //   return;
-        // }
-        
-        // 💡 修正した Python側の save_settings APIを叩き、UIを閉じてMATLABへ制御を戻す
+        if (payload.cancelled) {
+            alert("保存処理がキャンセルされました。エラー:", payload.errors);
+            return;
+        }
         await window.pywebview.api.save_settings(payload, "settings.json");
-        console.log("Payload to save:", payload);
     }));
 
     // ==========================================
     // 4. 名前を付けて保存
     // ==========================================
     byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
-        const rawPayload = collectSelectedPayload();
-
-        const payload = rawPayload;
-        
-        const errs = [
-            ...safeCheckValidity(mode1, payload),
-            ...safeCheckValidity(mode2, payload),
-            ...safeCheckValidity(mode3, payload),
-            ...safeCheckValidity(mode4, payload),
-            ...safeCheckValidity(mode5, payload),
-            ...safeCheckValidity(output, payload)
-        ];
-
-        if (errs.length) {
-        const msg = byId("msg");
-        if (msg) msg.textContent = "エラー: " + errs.join(" / ");
-        return;
+        const payload = collectSelectedPayload();
+        if (payload.cancelled) {
+            alert("保存処理がキャンセルされました。エラー:", payload.errors);
+            return;
         }
         await window.pywebview.api.save_settings_as(payload, "settings.json");
+        console.info("設定を保存しました。");
     }));
 
     // ==========================================
@@ -214,9 +182,13 @@ async function bootstrap() {
     // ==========================================
     byId("openFileBtn")?.addEventListener("click", withLock("openFileBtn", async () => {
         const res = await window.pywebview.api.load_settings_from();
-        if (!res?.ok) return;
+        if (!res?.ok) {
+            alert("設定ファイルの読み込みに失敗しました。");
+            return;
+        }
         store.apply(res.data ?? {});
         refreshAllSectionUi();
+        console.info("設定ファイルを読み込みました。");
     }));
 
     // ==========================================

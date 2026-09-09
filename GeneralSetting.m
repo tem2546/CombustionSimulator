@@ -43,6 +43,7 @@ classdef GeneralSetting < handle
         m5_Lstar = 2
         outputModeSelect = "auto"
         result_path = ""
+        cancelled = false
       
     end
     
@@ -57,22 +58,9 @@ classdef GeneralSetting < handle
 
         end
         
-        % % settings.jsonの絶対パスを作成
-        % function settingsPath(obj, root)
-        %     obj.jsonPath = fullfile(root, 'Settings', 'settings.json');
-        % end
-
-        % % Scriptsフォルダの絶対パスを作成
-        % function ScriptsPath(obj, root)
-        %     obj.scriptsPath = fullfile(root, 'Scripts');
-        % end
-        
         function launchUI(obj)
             root = fileparts(fileparts(obj.jsonPath));
 
-            % onedir build: exe lives in its own subfolder alongside its
-            % libraries (dist/GeneralSettingUI/GeneralSettingUI.exe), not
-            % directly under dist/ as with the old --onefile build.
             exePath = fullfile(root, 'Scripts', 'GeneralSettingUI', 'dist', 'GeneralSettingUI', 'GeneralSettingUI.exe');
             if ~exist(exePath, 'file')
                 error('GeneralSetting:exeNotFound', ...
@@ -80,7 +68,7 @@ classdef GeneralSetting < handle
             end
 
             settingsDir = fullfile(root, 'Settings');
-            command = sprintf('"%s" --settings-dir "%s"', exePath, settingsDir);
+            command = sprintf('start "" /wait "%s" --settings-dir "%s"', exePath, settingsDir);
             [status, cmdout] = system(command);
             if status ~= 0
                 error('GeneralSetting:launchFailed', ...

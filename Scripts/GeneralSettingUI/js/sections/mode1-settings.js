@@ -24,7 +24,7 @@ export class Mode1Settings {
       try {
         if (!window.pywebview?.api) return;
         const abs = await window.pywebview.api.open_file(
-          [{ description: "Data", extensions: ["xlsx", "csv", "txt"] }], false
+          { file_types: [`Excel Types (*.xlsx;*.csv;*.txt)`, `All files (*.*)`] }
         );
         if (!abs) return;
         
@@ -32,7 +32,7 @@ export class Mode1Settings {
         const dir = abs.slice(0, -(fname.length + 1));
         
         setLabel("thrust_fn_label", fname);
-        this.store.apply({ thrust: { fn: fname, path: dir } });
+        this.store.apply({ m1_thrust: { fn: fname, path: dir } });
       } catch (err) {
         console.error(err);
       } finally {
@@ -40,17 +40,17 @@ export class Mode1Settings {
       }
     });
   }
-
-  applyDefaults() {
+  
+  apply(data) {
     unsetLabel("thrust_fn_label");
-    setVal("noiseremoved", "No");
-    setVal("spikecut", "No");
-    setVal("csvout", "Yes");
-    setVal("calc_residual_time", "Yes");
-  }
-
-  apply() {
-    applyDefaults();
+    setVal("noiseremoved", data.m1_noiseremoved ?? "No");
+    setVal("spikecut", data.m1_spikecut ?? "No");
+    setVal("csvout", data.m1_csvout ?? "Yes");
+    setVal("calc_residual_time", data.m1_calc_residual_time ?? "Yes");
+  
+    if (data.m1_thrust?.fn) {
+      setLabel("thrust_fn_label", data.m1_thrust.fn);
+    }
   }
 
   collectPayload() {
@@ -58,7 +58,7 @@ export class Mode1Settings {
 
     // 現在選択されているラジオボタンの値を取得
     return {
-      thrust:       { fn: s.thrust?.fn ?? "", path: s.thrust?.path ?? "" },
+      thrust:       s.m1_thrust || { fn: "", path: "" },
       noiseremoved: getVal("noiseremoved") || "No",
       spikecut:     getVal("spikecut") || "No",
       csvout:       getVal("csvout") || "Yes",

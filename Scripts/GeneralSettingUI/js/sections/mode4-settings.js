@@ -17,11 +17,14 @@ export class Mode4Settings {
 
     // ファイル選択ボタンのイベント登録
     const pickBtn = byId("m4_pick_thrust_btn");
-    pickBtn?.addEventListener("click", async () => {
+    pickBtn?.addEventListener("click", async (e) => {
+      if (e.target.disabled) return;
+      e.target.disabled = true;
+
       try {
         if (!window.pywebview?.api) return;
         const abs = await window.pywebview.api.open_file(
-          [{ description: "Data", extensions: ["xlsx"] }], false
+          { file_types: [`Excel Data (*.xlsx)`, `All files (*.*)`] }
         );
         if (!abs) return;
 
@@ -29,22 +32,13 @@ export class Mode4Settings {
         const dir = abs.slice(0, -(fname.length + 1));
 
         setLabel("m4_thrust_fn_label", fname);
-        // ストアに選択されたファイルを保存
-        this.store.apply({
-          m4_thrust_file_select: { fn: fname, path: dir }
-        });
+        this.store.apply({ m4_thrust: { fn: fname, path: dir } });
       } catch (err) {
         console.error(err);
+      } finally {
+        e.target.disabled = false;
       }
     });
-  }
-
-  applyDefaults() {
-    unsetLabel("m4_thrust_fn_label");
-    setVal("m4_engine_select", "j-2i");
-    setVal("m4_oxidant_select", "N2O");
-    setVal("m4_fuel_select", "PP");
-    setVal("m4_spikecut", "Yes");
   }
 
   collectPayload() {
@@ -54,20 +48,21 @@ export class Mode4Settings {
       m4_oxidant_select: getVal("m4_oxidant_select") || "N2O",
       m4_fuel_select: getVal("m4_fuel_select") || "PP",
       m4_spikecut: getVal("m4_spikecut") || "Yes",
-      m4_thrust_file_select: s.m4_thrust_file_select || { fn: "", path: "" }
+      m4_thrust_file_select: s.m4_thrust || { fn: "", path: "" }
     };
   }
 
   apply(data) {
     if (!data) return;
+    unsetLabel("m4_thrust_fn_label");
     setVal("m4_engine_select", data.m4_engine_select ?? "j-2i");
     setVal("m4_oxidant_select", data.m4_oxidant_select ?? "N2O");
     setVal("m4_fuel_select", data.m4_fuel_select ?? "PP");
     setVal("m4_spikecut", data.m4_spikecut ?? "Yes");
 
-    if (data.m4_thrust_file_select) {
-      this.store?.apply({ m4_thrust_file_select: data.m4_thrust_file_select });
-      setLabel("m4_thrust_fn_label", data.m4_thrust_file_select.fn || "");
+    if (data.m4_thrust?.fn) {
+      this.store?.apply({ m4_thrust: data.m4_thrust });
+      setLabel("m4_thrust_fn_label", data.m4_thrust.fn || "");
     }
   }
 
