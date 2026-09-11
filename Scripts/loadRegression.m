@@ -1,7 +1,12 @@
-function reg = loadRegression(root, oxidizer, fuel)
+function reg = loadRegression(root, oxidizer, fuel, port)
 %LOADREGRESSION Load one fuel regression-rate coefficient set.
 %   The coefficient file uses SI units: regression rate in m/s and
-%   oxidizer mass flux in kg/(m^2 s).
+%   oxidizer mass flux in kg/(m^2 s). Port defaults to circle for settings
+%   files created before regression model selection was added.
+
+if nargin < 4 || strlength(strtrim(string(port))) == 0
+    port = "circle";
+end
 
 file = fullfile(root, 'Data', 'regression.csv');
 if ~isfile(file)
@@ -10,7 +15,7 @@ if ~isfile(file)
 end
 
 params = readtable(file, 'TextType', 'string');
-required = ["id", "oxidizer", "fuel", "a_SI", "n"];
+required = ["id", "oxidizer", "fuel", "port", "a_SI", "n"];
 missing = setdiff(required, string(params.Properties.VariableNames));
 if ~isempty(missing)
     error('Regression:InvalidFile', ...
@@ -25,6 +30,7 @@ end
 ids = strtrim(string(params.id));
 oxidizers = upper(strtrim(string(params.oxidizer)));
 fuels = upper(strtrim(string(params.fuel)));
+ports = lower(strtrim(string(params.port)));
 
 if any(ismissing(ids) | strlength(ids) == 0)
     error('Regression:InvalidFile', '空のidは使用できません。');
@@ -33,10 +39,14 @@ if numel(unique(lower(ids))) ~= numel(ids)
     error('Regression:DuplicateId', '重複したidがあります。');
 end
 
-keys = oxidizers + "/" + fuels;
+if any(ismissing(ports) | strlength(ports) == 0)
+    error('Regression:InvalidFile', '空のportは使用できません。');
+end
+
+keys = oxidizers + "/" + fuels + "/" + ports;
 if numel(unique(keys)) ~= numel(keys)
-    error('Regression:DuplicatePair', ...
-        '酸化剤と燃料の組み合わせが重複しています。');
+    error('Regression:DuplicateSet', ...
+        '酸化剤、燃料、ポートモデルの組み合わせが重複しています。');
 end
 
 if any(~isfinite(params.a_SI) | params.a_SI <= 0) || ...
@@ -45,7 +55,8 @@ if any(~isfinite(params.a_SI) | params.a_SI <= 0) || ...
 end
 
 target = upper(strtrim(string(oxidizer))) + "/" + ...
-    upper(strtrim(string(fuel)));
+    upper(strtrim(string(fuel))) + "/" + ...
+    lower(strtrim(string(port)));
 match = keys == target;
 if ~any(match)
     available = strjoin(keys, ', ');
@@ -61,4 +72,5 @@ reg.a = params.a_SI(row);
 reg.n = params.n(row);
 reg.oxidizer = oxidizers(row);
 reg.fuel = fuels(row);
+reg.port = ports(row);
 end

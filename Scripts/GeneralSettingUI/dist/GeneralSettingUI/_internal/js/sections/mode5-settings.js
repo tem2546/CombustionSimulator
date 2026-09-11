@@ -9,6 +9,7 @@ export class Mode5Settings {
   applyDefaults() {
     setVal("m5_oxidant_select", "N2O");
     setVal("m5_fuel_select", "PE");
+    setVal("m5_port_select", "circle");
     setVal("m5_F_req", 250);
     setVal("m5_I_req", 1500);
     setVal("m5_vt", 2000);
@@ -26,6 +27,7 @@ export class Mode5Settings {
     return {
       m5_oxidant_select: getVal("m5_oxidant_select") || "N2O",
       m5_fuel_select: getVal("m5_fuel_select") || "PE",
+      m5_port_select: getVal("m5_port_select") || "circle",
       m5_F_req: parseFloat(getVal("m5_F_req")) || 250,
       m5_I_req: parseFloat(getVal("m5_I_req")) || 1500,
       m5_vt: parseFloat(getVal("m5_vt")) || 2000,
@@ -44,6 +46,7 @@ export class Mode5Settings {
     if (!data) return;
     setVal("m5_oxidant_select", data.m5_oxidant_select ?? "N2O");
     setVal("m5_fuel_select", data.m5_fuel_select ?? "PE");
+    setVal("m5_port_select", data.m5_port_select ?? "circle");
     setVal("m5_F_req", data.m5_F_req ?? 250);
     setVal("m5_I_req", data.m5_I_req ?? 1500);
     setVal("m5_vt", data.m5_vt ?? 2000);
@@ -59,6 +62,9 @@ export class Mode5Settings {
 
   checkValidity(payload) {
     const errs = [];
+    if (payload.m5_port_select === "star_swirl" && payload.m5_fuel_select !== "ABS") {
+      errs.push("設計: 星形旋回の後退速度モデルはABSでのみ使用できます");
+    }
     if (payload.m5_F_req <= 0) errs.push("設計: 要求推力は0Nより大きい必要があります");
     if (payload.m5_I_req <= 0) errs.push("設計: 要求トータルインパルスは0Nsより大きい必要があります");
     return errs;

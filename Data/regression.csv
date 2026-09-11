@@ -1,2 +1,5 @@
-id,oxidizer,fuel,a_SI,n
-n2o_pe,N2O,PE,1.16e-4,0.33
+id,oxidizer,fuel,port,a_SI,n
+n2o_pe,N2O,PE,circle,1.16e-4,0.33
+n2o_pp,N2O,PP,circle,7.49e-5,0.68
+n2o_abs,N2O,ABS,circle,8.70e-6,0.930
+n2o_abs_sf,N2O,ABS,star_swirl,1.07e-5,1.02

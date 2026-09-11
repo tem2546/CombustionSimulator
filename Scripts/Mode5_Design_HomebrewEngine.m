@@ -51,9 +51,20 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
 
             %選択した推進薬に対応する燃料後退速度係数
             root = fileparts(gs.scriptsPath);
-            data.chamber.reg = loadRegression(root, choice.oxidant, choice.fuel);
-            fprintf('燃料後退速度係数: %s (a=%g, n=%g)\n', ...
-                data.chamber.reg.id, data.chamber.reg.a, data.chamber.reg.n);
+            data.chamber.reg = loadRegression(root, choice.oxidant, ...
+                choice.fuel, choice.port);
+            fprintf('燃料後退速度係数: %s (port=%s, a=%g, n=%g)\n', ...
+                data.chamber.reg.id, data.chamber.reg.port, ...
+                data.chamber.reg.a, data.chamber.reg.n);
+            if data.chamber.reg.id == "n2o_pp"
+                warning('Regression:ProvisionalPP', ...
+                    ['PP係数は単一実験点を基準とした暫定近似です。' ...
+                    '結果は初期検討用として扱ってください。']);
+            elseif data.chamber.reg.port == "star_swirl"
+                warning('Regression:CircularPortApproximation', ...
+                    ['星形旋回フラクタルの後退速度式を円形ポート計算へ' ...
+                    '近似適用します。星形の燃焼表面積は再現されません。']);
+            end
 
             disp("==== rho_f DEBUG ====")%20260508のデバッグにて4行追加
             disp(choice.fuel)
@@ -86,9 +97,11 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             % UIから選択された酸化剤・燃料を直接取得
             choice.oxidant = gs.m5_oxidant_select;
             choice.fuel = gs.m5_fuel_select;
+            choice.port = gs.m5_port_select;
             
             disp(strcat('選択した酸化剤：', choice.oxidant));
             disp(strcat('選択した燃料：', choice.fuel));
+            disp(strcat('選択した後退速度モデル：', choice.port));
 
             infile.oxidant = strcat(choice.oxidant, '_data.xlsx');
             infile.fuel = 'Fuel_data.xlsx';
@@ -829,6 +842,7 @@ parameters.Lf=Lf;                       %燃料長さ
 parameters.dfi=dfs(1,1);                 %初期ポート径
 parameters.port=1;                      %ポート数
 parameters.regression_id=reg.id;        %燃料後退速度係数ID
+parameters.regression_port=reg.port;    %燃料後退速度モデル
 parameters.a=reg.a;                     %燃料後退速度係数
 parameters.n=reg.n;                     %酸化剤質量流束指数
 
