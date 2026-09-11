@@ -15,6 +15,11 @@ function Combustion_Simulator()
     %JSONを読み込む
     gs.load();
 
+    if gs.cancelled
+        disp('設定画面がキャンセルされたため、シミュレーションを実行しません。');
+        return;
+    end
+
     choice = questdlg('シミュレーションを実行しますか？', ...
         '実行確認', ...
         '実行する', 'キャンセル', '実行する');
@@ -26,7 +31,11 @@ function Combustion_Simulator()
     
     % 4. 実行 (Mode1などはパスが通っているので直接呼び出せる)
     % mode = gs.execution_mode;
-    mode = double(string(gs.execution_mode));
+    mode = str2double(string(gs.execution_mode));
+    if ~isscalar(mode) || ~isfinite(mode) || ~ismember(mode, 1:5)
+        error('CombustionSimulator:InvalidMode', ...
+            '実行モードが不正です。設定画面からモード1～5を選択して保存してください。');
+    end
     
     fprintf('モード %d を実行します。\n', mode);
 

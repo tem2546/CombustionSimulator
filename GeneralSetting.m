@@ -44,6 +44,7 @@ classdef GeneralSetting < handle
         m5_Lstar = 2
         outputModeSelect = "auto"
         result_path = ""
+        cancelled = false
       
     end
     

@@ -48,20 +48,35 @@ function safeCheckValidity(section, payload) {
     return section?.checkValidity ? section.checkValidity(payload) : [];
 }
 
+function showMessage(message) {
+    const msg = byId("msg");
+    if (msg) msg.textContent = message;
+}
+
 function collectSelectedPayload() {
-    const selectedMode = Number.parseInt(panelModeSelector.value);
+    const selectedMode = Number.parseInt(panelModeSelector.value, 10);
 
     if(selectedMode < 1 || selectedMode > modeSections.length) {
-        console.warn("モードを選択してください");
-        return output.collectPayload();
+        return {
+            cancelled: true,
+            errors: ["モードを選択してください"]
+        };
     }
 
-    return {
+    const payload = {
+        cancelled: false,
         modeSelect: selectedMode.toString(),
         execution_mode: selectedMode.toString(),
         ...modeSections[selectedMode - 1].collectPayload(),
         ...output.collectPayload()
     };
+
+    const errors = [
+        ...safeCheckValidity(modeSections[selectedMode - 1], payload),
+        ...safeCheckValidity(output, payload)
+    ];
+
+    return errors.length ? { ...payload, cancelled: true, errors } : payload;
 }
 
 // 💡 外部からデータを読み込んだときに、各クラスの画面反映メソッド (apply または applyDefaults) を安全に叩く関数
@@ -129,6 +144,7 @@ async function bootstrap() {
             await callback();
         } catch (err) {
             console.error(err);
+            showMessage(`エラー: ${err?.message || err}`);
         } finally {
             btn.disabled = false;
         }
@@ -160,51 +176,31 @@ async function bootstrap() {
     // ==========================================
     byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
         const payload = collectSelectedPayload();
-
-        全モードの入力値バリデーションを実行
-        const errs = [
-          ...safeCheckValidity(mode1, payload),
-          ...safeCheckValidity(mode2, payload),
-          ...safeCheckValidity(mode3, payload),
-          ...safeCheckValidity(mode4, payload),
-          ...safeCheckValidity(mode5, payload),
-          ...safeCheckValidity(output, payload)
-        ];
-
-        if (errs.length) {
-          const msg = byId("msg");
-          if (msg) msg.textContent = "エラー: " + errs.join(" / ");
-          return;
+        if (payload.cancelled) {
+            showMessage("エラー: " + payload.errors.join(" / "));
+            return;
         }
-        
-        // 💡 修正した Python側の save_settings APIを叩き、UIを閉じてMATLABへ制御を戻す
-        await window.pywebview.api.save_settings(payload, "settings.json");
-        console.log("Payload to save:", payload);
+
+        const res = await window.pywebview.api.save_settings(payload, "settings.json");
+        if (!res?.ok) {
+            showMessage("エラー: 設定を保存できませんでした。" + (res?.error || ""));
+        }
     }));
 
     // ==========================================
     // 4. 名前を付けて保存
     // ==========================================
     byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
-        const rawPayload = collectSelectedPayload();
-
-        const payload = rawPayload;
-        
-        const errs = [
-            ...safeCheckValidity(mode1, payload),
-            ...safeCheckValidity(mode2, payload),
-            ...safeCheckValidity(mode3, payload),
-            ...safeCheckValidity(mode4, payload),
-            ...safeCheckValidity(mode5, payload),
-            ...safeCheckValidity(output, payload)
-        ];
-
-        if (errs.length) {
-        const msg = byId("msg");
-        if (msg) msg.textContent = "エラー: " + errs.join(" / ");
-        return;
+        const payload = collectSelectedPayload();
+        if (payload.cancelled) {
+            showMessage("エラー: " + payload.errors.join(" / "));
+            return;
         }
-        await window.pywebview.api.save_settings_as(payload, "settings.json");
+
+        const res = await window.pywebview.api.save_settings_as(payload, "settings.json");
+        if (!res?.ok) {
+            showMessage("エラー: 設定を保存できませんでした。" + (res?.error || ""));
+        }
     }));
 
     // ==========================================
