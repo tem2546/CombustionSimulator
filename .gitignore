@@ -12,6 +12,7 @@ Thrustdata/
 compress_project.py
 settings.json
 *.csv
+!Data/regression.csv
 *.inp
 *.out
 *.txt

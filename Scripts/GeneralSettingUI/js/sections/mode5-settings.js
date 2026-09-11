@@ -8,7 +8,7 @@ export class Mode5Settings {
 
   applyDefaults() {
     setVal("m5_oxidant_select", "N2O");
-    setVal("m5_fuel_select", "PP");
+    setVal("m5_fuel_select", "PE");
     setVal("m5_F_req", 250);
     setVal("m5_I_req", 1500);
     setVal("m5_vt", 2000);
@@ -25,7 +25,7 @@ export class Mode5Settings {
   collectPayload() {
     return {
       m5_oxidant_select: getVal("m5_oxidant_select") || "N2O",
-      m5_fuel_select: getVal("m5_fuel_select") || "PP",
+      m5_fuel_select: getVal("m5_fuel_select") || "PE",
       m5_F_req: parseFloat(getVal("m5_F_req")) || 250,
       m5_I_req: parseFloat(getVal("m5_I_req")) || 1500,
       m5_vt: parseFloat(getVal("m5_vt")) || 2000,
@@ -43,7 +43,7 @@ export class Mode5Settings {
   apply(data) {
     if (!data) return;
     setVal("m5_oxidant_select", data.m5_oxidant_select ?? "N2O");
-    setVal("m5_fuel_select", data.m5_fuel_select ?? "PP");
+    setVal("m5_fuel_select", data.m5_fuel_select ?? "PE");
     setVal("m5_F_req", data.m5_F_req ?? 250);
     setVal("m5_I_req", data.m5_I_req ?? 1500);
     setVal("m5_vt", data.m5_vt ?? 2000);

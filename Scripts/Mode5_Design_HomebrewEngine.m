@@ -49,6 +49,12 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             %燃料データ%燃料密度
             data.chamber.rho_f = table2array(Fueldata(choice.fuel,"密度[kg/m^3]"));%燃料密度
 
+            %選択した推進薬に対応する燃料後退速度係数
+            root = fileparts(gs.scriptsPath);
+            data.chamber.reg = loadRegression(root, choice.oxidant, choice.fuel);
+            fprintf('燃料後退速度係数: %s (a=%g, n=%g)\n', ...
+                data.chamber.reg.id, data.chamber.reg.a, data.chamber.reg.n);
+
             disp("==== rho_f DEBUG ====")%20260508のデバッグにて4行追加
             disp(choice.fuel)
             disp(Fueldata)
@@ -405,17 +411,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
 
     end
 
-        function [df,dfs,a,n,time_step,Lf] = Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df)
+        function [df,dfs,time_step,Lf] = Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df,reg)
             while(true)
-
-                %酸化剤流束係数
-                %a=1.31*10^(-4);
-                %a=3.4713*10^(-6);
-                %a=2.764*10^(-6);
-                a=1.16*10^(-4);
-                %酸化剤流束指数
-                %n=0.95;
-                n=0.33;
 
                 %タイムサンプリングレート
                 time_step=0.005;
@@ -428,7 +425,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                     if(i==1)
                         dfs(i,1)=df;
                     else
-                        dfs(i,1)=rungekutta(dfs(i-1,1),ave.mdot_ox,a,n,time_step);
+                        dfs(i,1)=advancePortDiameter(dfs(i-1,1),ave.mdot_ox,reg,time_step);
                     end
                 end
                 disp(strcat("最終ポート径",num2str(dfs(end,1)*10^3)))
@@ -450,8 +447,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                     option.phi=input('スライパ率が適正値か？(y/n)','s');
                     if(option.phi=="y")
                         %燃料長さ
-                        Lf=(initial.mdot_ox/initial.of)/(pi*df*rho_f*a)* ...
-                            (4*initial.mdot_ox/(pi*df^2))^(-n);
+                        Lf=(initial.mdot_ox/initial.of)/(pi*df*rho_f*reg.a)* ...
+                            (4*initial.mdot_ox/(pi*df^2))^(-reg.n);
 
                         Lf=round(Lf,3);
                         msg.Lf=strcat('燃料長さ：',num2str(Lf*10^3),'[mm]');
@@ -469,7 +466,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             end
         end
 
-        function [initial,final,ave,planed_burning_time,dfs,Lf,a,n,time_step] = Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do)
+        function [initial,final,ave,planed_burning_time,dfs,Lf,time_step] = Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do,reg)
             while(true)
                 %以下燃料設計
                 %最終圧力推定
@@ -527,7 +524,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                 Df = input('燃料外径[mm]：')*10^(-3);
 
                 %燃料長さ
-                [initial.df,dfs,a,n,time_step,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df);
+                [initial.df,dfs,time_step,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df,reg);
                 dthroat = initial.dthroat;
 
                 flag.Lfstar=true;
@@ -559,7 +556,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                         disp(strcat('最大燃料長さ:',num2str(Lf_max),'[m]'));
                         disp(strcat('燃料長さ:',num2str(Lf),'[m]'));
                         %初期ポート径
-                        Initialof_predict = nthroot(Lf*initial.df^(1-2*n)/Lf_max,1-2*n);
+                        Initialof_predict = nthroot(Lf*initial.df^(1-2*reg.n)/Lf_max,1-2*reg.n);
                         disp(strcat('初期ポート径が', ...
                             num2str(Initialof_predict*10^3), ...
                             '[mm]以下じゃないと最大燃料長さを凌駕します。'));
@@ -589,7 +586,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                             msg.dfi=strcat('現在の初期ポート径：',num2str(initial.df*10^3),'[mm]');
                             disp(msg.dfi);
                             df=input('新しい初期ポート径[mm]：')*10^(-3);
-                            [initial.df,dfs,a,n,time_step,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df);
+                            [initial.df,dfs,time_step,Lf] = Mode5_Design_HomebrewEngine.Calc_Lf(initial,rho_f,planed_burning_time,ave,df,Df,reg);
                         case "l"
                             option.Lfstar='y';
                             Lstar_min = input('必要な燃焼室特性長[m]:');
@@ -598,7 +595,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                             flag.Lfstar = 0;
                             disp('O/F比を補正します。');
 
-                            initial.mdot_f = Lf_max*pi*initial.df*rho_f*a*(4*initial.mdot_ox/(pi*initial.df^2))^n;
+                            initial.mdot_f = Lf_max*pi*initial.df*rho_f*reg.a*(4*initial.mdot_ox/(pi*initial.df^2))^reg.n;
                             initial.of = initial.mdot_ox/initial.mdot_f;
 
                             disp(strcat('補正後の初期O/F比：', num2str(initial.of)));
@@ -646,6 +643,7 @@ function parameters = design_parameter(data, gs)
 cstar = data.cstar;     %特性排気速度
 gamma = data.gamma;     %比熱比
 rho_f = data.rho_f;     %燃料密度
+reg = data.reg;         %燃料後退速度係数
 rho_ox = 852.2;         %酸化剤密度
 pe = 1.013*10^5;          %大気圧
 
@@ -672,7 +670,7 @@ while(flag.req==1)
     disp('<供給系設計完了>');
 
     disp('<燃料系設計開始>')
-    [initial,final,ave,planed_burning_time,dfs,Lf,a,n,time_step] = Mode5_Design_HomebrewEngine.Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do);
+    [initial,final,ave,planed_burning_time,dfs,Lf,time_step] = Mode5_Design_HomebrewEngine.Calc_Fuel_System(cstar,gamma,initial,vt,pe,rho_ox,rho_f,F_req,cstar_eff,Cd,do,reg);
     dthroat = initial.dthroat;
     disp('<燃料系設計完了>')
    
@@ -684,8 +682,8 @@ while(flag.req==1)
     disp(rho_f)
     disp(Lf)
     disp(dfs(end,1))
-    disp(a)
-    disp(n) %デバッグ行終わり
+    disp(reg.a)
+    disp(reg.n) %デバッグ行終わり
 
     %燃焼終了時の各質量流量
     deltaP_final = final.pt - final.pc;
@@ -693,7 +691,7 @@ while(flag.req==1)
         error("最終時刻の供給差圧が正ではありません。");
     end
     final.mdot_ox=Cd*pi/4*do^2*sqrt(2*rho_ox*deltaP_final);
-    final.mdot_f=rho_f*Lf*pi*dfs(end,1)*a*(4*final.mdot_ox/(pi*dfs(end,1)^2))^n;
+    final.mdot_f=rho_f*Lf*pi*dfs(end,1)*reg.a*(4*final.mdot_ox/(pi*dfs(end,1)^2))^reg.n;
     final.mdot_p=final.mdot_ox+final.mdot_f;
 
 
@@ -797,7 +795,8 @@ end
 
 %グレインの燃料内径・燃料後退速度の時間変化をCSV出力
 time = (0:length(dfs)-1)'*time_step;         %時間[s]
-rdot = 2*a*(4*ave.mdot_ox./(pi*dfs.^2)).^n;  %燃料後退速度[m/s]
+Gox = 4*ave.mdot_ox./(pi*dfs.^2);            %酸化剤質量流束[kg/(m^2 s)]
+rDot = reg.a*Gox.^reg.n;                     %半径方向の燃料後退速度[m/s]
 
 exportcsv = questdlg('グレインの燃料内径・燃料後退速度の時間変化をcsv出力しますか？', ...
     'Output the csv File?',"Yes","No","Yes");
@@ -807,8 +806,8 @@ if(exportcsv == "Yes")
     dfTable = table(time,dfs,'VariableNames',{'time[s]','df[m]'});
     writetable(dfTable,'DesignEngine_df_history.csv')
 
-    rdotTable = table(time,rdot,'VariableNames',{'time[s]','rdot[m/s]'});
-    writetable(rdotTable,'DesignEngine_rdot_history.csv')
+    rDotTable = table(time,rDot,'VariableNames',{'time[s]','regression_rate[m/s]'});
+    writetable(rDotTable,'DesignEngine_rdot_history.csv')
 
     cd('../Scripts')
 end
@@ -829,8 +828,9 @@ parameters.rho_f=rho_f;                 %燃料密度
 parameters.Lf=Lf;                       %燃料長さ
 parameters.dfi=dfs(1,1);                 %初期ポート径
 parameters.port=1;                      %ポート数
-parameters.a=a;                         %酸化剤流束係数
-parameters.n=n;                         %酸化剤流束指数
+parameters.regression_id=reg.id;        %燃料後退速度係数ID
+parameters.a=reg.a;                     %燃料後退速度係数
+parameters.n=reg.n;                     %酸化剤質量流束指数
 
 parameters.cstar_eff=cstar_eff;         %特性排気速度効率
 parameters.pse=pe;                      %背圧
@@ -843,21 +843,17 @@ parameters.cstar=cstar;                 %特性排気速度
 parameters.gamma=gamma;                 %比熱比
 end
 
-%runge-kutta法
-function dff=rungekutta(df1,mdot_ox,a,n,time_step)
-%燃料後退速度式
-rdot=@(df)(2*a*(mdot_ox*4/(pi*df^2))^n);
+%Runge-Kutta法で次時刻の燃料ポート径を求める
+function nextDiameter=advancePortDiameter(portDiameter,mdotOx,reg,timeStep)
+%ポート径の増加速度は半径方向の燃料後退速度の2倍
+dDot=@(diameter)(2*reg.a*(4*mdotOx/(pi*diameter^2))^reg.n);
 
-k1=rdot(df1);        %区間の最初における勾配
-df2=df1+k1*time_step/2;
-k2=rdot(df2);        %区間の中央における勾配の近似値
-df3=df1+k2*time_step/2;
-k3=rdot(df3);        %区間の中央における勾配の近似値
-df4=df1+k3*time_step;
-k4=rdot(df4);        %区間の最後における勾配の近似値
+k1=dDot(portDiameter);
+k2=dDot(portDiameter+k1*timeStep/2);
+k3=dDot(portDiameter+k2*timeStep/2);
+k4=dDot(portDiameter+k3*timeStep);
 
-%最終的な燃料ポート径
-dff=df1+(k1+2*k2+2*k3+k4)*time_step/6;
+nextDiameter=portDiameter+(k1+2*k2+2*k3+k4)*timeStep/6;
 end
 
 %線形補間関数
