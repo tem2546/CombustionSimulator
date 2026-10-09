@@ -7,18 +7,6 @@ export class Mode3Settings {
     this.store = store;
   }
 
-  // 初期デフォルト値の適用
-  applyDefaults() {
-    setVal("m3_fuel_select", "PP");
-    setVal("m3_oxidant_select", "N2O");
-    setVal("m3_hkj", -713.01204);
-    setVal("m3_c_atom", 30);
-    setVal("m3_o_atom", 0);
-    setVal("m3_h_atom", 60);
-    setVal("m3_n_atom", 0);
-    setVal("m3_tk", 297);
-  }
-
   // フォームからデータを一括収集（Mode2と同様にbyIdから直接確実に取得）
   collectPayload() {
     return {

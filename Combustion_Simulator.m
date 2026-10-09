@@ -15,6 +15,11 @@ function Combustion_Simulator()
     %JSONを読み込む
     gs.load();
 
+    if gs.cancelled
+        disp('設定がキャンセルされました。');
+        return;
+    end
+
     choice = questdlg('シミュレーションを実行しますか？', ...
         '実行確認', ...
         '実行する', 'キャンセル', '実行する');

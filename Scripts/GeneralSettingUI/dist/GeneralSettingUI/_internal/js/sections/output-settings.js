@@ -57,16 +57,16 @@ export class OutputSettings {
     this.toggleOutputRow();
   }
 
-  applyDefaults() {
+  apply() {
     unselLabel("result_path_label");
     const s = this.store.get();
-
+  
     setVal("outputModeSelect", s.outputModeSelect || "auto");
     
     if (typeof this.toggleOutputRow === "function") {
       this.toggleOutputRow();
     }
-
+  
     if (s.result_path) {
       selLabel("result_path_label", s.result_path);
     }

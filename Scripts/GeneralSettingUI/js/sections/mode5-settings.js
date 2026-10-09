@@ -6,22 +6,6 @@ export class Mode5Settings {
     this.store = store;
   }
 
-  applyDefaults() {
-    setVal("m5_oxidant_select", "N2O");
-    setVal("m5_fuel_select", "PP");
-    setVal("m5_F_req", 250);
-    setVal("m5_I_req", 1500);
-    setVal("m5_vt", 2000);
-    setVal("m5_pti", 5.0);
-    setVal("m5_cstar_eff", 0.85);
-    setVal("m5_Cd", 0.7);
-    setVal("m5_do", 3.5);
-    setVal("m5_df", 15);
-    setVal("m5_Df_outer", 50);
-    setVal("m5_Lf_max", 0.5);
-    setVal("m5_Lstar", 2.0);
-  }
-
   collectPayload() {
     return {
       m5_oxidant_select: getVal("m5_oxidant_select") || "N2O",
