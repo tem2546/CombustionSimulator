@@ -664,7 +664,7 @@ cstar = data.cstar;     %特性排気速度
 gamma = data.gamma;     %比熱比
 rho_f = data.rho_f;     %燃料密度
 reg = data.reg;         %燃料後退速度係数
-rho_ox = 852.2;         %酸化剤密度
+rho_ox = 830;         %酸化剤密度
 pe = 1.013*10^5;          %大気圧
 
 disp("===== DEBUG =====")
