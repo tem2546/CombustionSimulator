@@ -55,6 +55,30 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
 
             %燃料データ%燃料密度
             data.chamber.rho_f = table2array(Fueldata(choice.fuel,"密度[kg/m^3]"));%燃料密度
+
+            %選択した推進薬に対応する燃料後退速度係数
+            root = fileparts(gs.scriptsPath);
+            data.chamber.reg = loadRegression(root, choice.oxidant, ...
+                choice.fuel, choice.port);
+            fprintf('燃料後退速度係数: %s (port=%s, a=%g, n=%g)\n', ...
+                data.chamber.reg.id, data.chamber.reg.port, ...
+                data.chamber.reg.a, data.chamber.reg.n);
+            if data.chamber.reg.id == "n2o_pp"
+                warning('Regression:ProvisionalPP', ...
+                    ['PP係数は単一実験点を基準とした暫定近似です。' ...
+                    '結果は初期検討用として扱ってください。']);
+            elseif data.chamber.reg.port == "star_swirl"
+                warning('Regression:CircularPortApproximation', ...
+                    ['星形旋回フラクタルの後退速度式を円形ポート計算へ' ...
+                    '近似適用します。星形の燃焼表面積は再現されません。']);
+            end
+            if strcmpi(string(choice.fuel), "ABS") && ...
+                    abs(data.chamber.rho_f - 768) > 1
+                warning('Regression:AbsDensityMismatch', ...
+                    ['ABS後退速度式の文献実効密度は768 kg/m^3ですが、' ...
+                    '入力値は%g kg/m^3です。燃料質量流量の解釈に注意してください。'], ...
+                    data.chamber.rho_f);
+            end
         end
 
         %設計用ファイル読み込み
@@ -62,9 +86,11 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             % UIから選択された酸化剤・燃料を直接取得
             choice.oxidant = gs.m5_oxidant_select;
             choice.fuel = gs.m5_fuel_select;
+            choice.port = gs.m5_port_select;
 
             disp(strcat('選択した酸化剤：', choice.oxidant));
             disp(strcat('選択した燃料：', choice.fuel));
+            disp(strcat('選択した後退速度モデル：', choice.port));
 
             infile.oxidant = strcat(choice.oxidant, '_data.xlsx');
             infile.fuel = 'Fuel_data.xlsx';
@@ -98,7 +124,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             cstar = data.chamber.cstar;     %特性排気速度
             gamma = data.chamber.gamma;     %比熱比
             rho_f = data.chamber.rho_f;     %燃料密度
-            rho_ox = 852.2;                 %酸化剤密度
+            reg = data.chamber.reg;         %選択した燃料後退速度モデル
+            rho_ox = 830;                   %酸化剤密度
             pe = 1.013*10^5;                %大気圧
 
             report.warnings = {};
@@ -127,7 +154,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             end
 
             [fuel, fuelStatus] = Mode5_Design_HomebrewEngine.Calc_Fuel_System( ...
-                supply, vt, rho_ox, rho_f, p.Cd, do, final_pt, p.Lf_max, p.Lstar, df, Df);
+                supply, vt, rho_ox, rho_f, p.Cd, do, final_pt, p.Lf_max, p.Lstar, df, Df, reg);
             report.fuel = fuel;
             report.fuelStatus = fuelStatus;
             if ~fuelStatus.ok
@@ -186,6 +213,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             parameters.Lf=fuel.Lf;                  %燃料長さ
             parameters.dfi=fuel.dfs(1,1);           %初期ポート径
             parameters.port=1;                      %ポート数
+            parameters.regression_id=reg.id;        %燃料後退速度係数ID
+            parameters.regression_port=reg.port;    %燃料後退速度モデル
             parameters.a=fuel.a;                    %酸化剤流束係数
             parameters.n=fuel.n;                    %酸化剤流束指数
             parameters.cstar_eff=p.cstar_eff;       %特性排気速度効率
@@ -297,13 +326,13 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
         end
 
         %燃料ポート径の時間変化（ルンゲクッタ）とスライバ率を算出.
-        function [lf, status] = Calc_Lf(initial, rho_f, planed_burning_time, ave, df, Df)
+        function [lf, status] = Calc_Lf(initial, rho_f, planed_burning_time, ave, df, Df, reg)
             status.ok = false;
             status.message = '';
             lf = struct();
 
-            a=1.16*10^(-4);   %酸化剤流束係数
-            n=0.33;           %酸化剤流束指数
+            a=reg.a;         %選択した酸化剤流束係数
+            n=reg.n;         %選択した酸化剤流束指数
             time_step=0.005;  %タイムサンプリングレート
 
             i_max = round(planed_burning_time/time_step);
@@ -314,7 +343,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                 if(i==1)
                     dfs(i,1)=df;
                 else
-                    dfs(i,1)=rungekutta(dfs(i-1,1),ave.mdot_ox,a,n,time_step);
+                    dfs(i,1)=advancePortDiameter(dfs(i-1,1),ave.mdot_ox,reg,time_step);
                 end
             end
 
@@ -345,7 +374,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
         end
 
         %燃料系設計（最終圧力・燃料長さ・特性長の整合性チェック）.
-        function [fuel, status] = Calc_Fuel_System(initial, vt, rho_ox, rho_f, Cd, do, final_pt, Lf_max, Lstar_min, df, Df)
+        function [fuel, status] = Calc_Fuel_System(initial, vt, rho_ox, rho_f, Cd, do, final_pt, Lf_max, Lstar_min, df, Df, reg)
             status.ok = false;
             status.message = '';
             fuel = struct();
@@ -382,7 +411,7 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
                 return
             end
 
-            [lf, lfStatus] = Mode5_Design_HomebrewEngine.Calc_Lf(initial, rho_f, planed_burning_time, ave, df, Df);
+            [lf, lfStatus] = Mode5_Design_HomebrewEngine.Calc_Lf(initial, rho_f, planed_burning_time, ave, df, Df, reg);
             if ~lfStatus.ok
                 status.message = lfStatus.message;
                 return
@@ -437,7 +466,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
         %グレインのポート径・後退速度の時間変化をCSV出力.
         function ExportGrainHistory(dfs, time_step, a, n, ave_mdot_ox, outputDir)
             time = (0:length(dfs)-1)'*time_step;         %時間[s]
-            rdot = 2*a*(4*ave_mdot_ox./(pi*dfs.^2)).^n;   %燃料後退速度[m/s]
+            Gox = 4*ave_mdot_ox./(pi*dfs.^2);            %酸化剤質量流束[kg/(m^2 s)]
+            rDot = a*Gox.^n;                          %半径方向の燃料後退速度[m/s]
 
             if ~exist(outputDir, 'dir')
                 mkdir(outputDir);
@@ -446,8 +476,8 @@ classdef Mode5_Design_HomebrewEngine < BaseSystem
             dfTable = table(time,dfs,'VariableNames',{'time[s]','df[m]'});
             writetable(dfTable,fullfile(outputDir,'DesignEngine_df_history.csv'));
 
-            rdotTable = table(time,rdot,'VariableNames',{'time[s]','rdot[m/s]'});
-            writetable(rdotTable,fullfile(outputDir,'DesignEngine_rdot_history.csv'));
+            rDotTable = table(time,rDot,'VariableNames',{'time[s]','regression_rate[m/s]'});
+            writetable(rDotTable,fullfile(outputDir,'DesignEngine_rdot_history.csv'));
 
             disp(['CSVを出力しました: ', outputDir]);
         end
@@ -520,21 +550,17 @@ end
 F_achievable = 0;
 end
 
-%runge-kutta法
-function dff=rungekutta(df1,mdot_ox,a,n,time_step)
-%燃料後退速度式
-rdot=@(df)(2*a*(mdot_ox*4/(pi*df^2))^n);
+%Runge-Kutta法で次時刻の燃料ポート径を求める
+function nextDiameter=advancePortDiameter(portDiameter,mdotOx,reg,timeStep)
+%ポート径の増加速度は半径方向の燃料後退速度の2倍
+dDot=@(diameter)(2*reg.a*(4*mdotOx/(pi*diameter^2))^reg.n);
 
-k1=rdot(df1);        %区間の最初における勾配
-df2=df1+k1*time_step/2;
-k2=rdot(df2);        %区間の中央における勾配の近似値
-df3=df1+k2*time_step/2;
-k3=rdot(df3);        %区間の中央における勾配の近似値
-df4=df1+k3*time_step;
-k4=rdot(df4);        %区間の最後における勾配の近似値
+k1=dDot(portDiameter);
+k2=dDot(portDiameter+k1*timeStep/2);
+k3=dDot(portDiameter+k2*timeStep/2);
+k4=dDot(portDiameter+k3*timeStep);
 
-%最終的な燃料ポート径
-dff=df1+(k1+2*k2+2*k3+k4)*time_step/6;
+nextDiameter=portDiameter+(k1+2*k2+2*k3+k4)*timeStep/6;
 end
 
 %線形補間関数

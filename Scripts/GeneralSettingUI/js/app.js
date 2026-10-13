@@ -45,29 +45,39 @@ function whenPywebviewReady() {
     });
 }
 
-// 収集したデータをまとめて返す関数
+function safeCheckValidity(section, payload) {
+    return section?.checkValidity ? section.checkValidity(payload) : [];
+}
+
+function showMessage(message) {
+    const msg = byId("msg");
+    if (msg) msg.textContent = message;
+}
+
 function collectSelectedPayload() {
-    const selectedMode = Number.parseInt(panelModeSelector.value);
+    const selectedMode = Number.parseInt(panelModeSelector.value, 10);
+
     if(selectedMode < 1 || selectedMode > modeSections.length) {
-        alert("モードを選択してください");
-        return output.collectPayload();
+        return {
+            cancelled: true,
+            errors: ["モードを選択してください"]
+        };
     }
 
-    const errs = [ 
-        ...modeSections[selectedMode - 1].checkValidity(store.get()),
-        ...output.checkValidity(store.get())
-    ];
-    if (errs.length > 0) {
-        return { cancelled: true, errors: errs };
-    }
-
-    return {
+    const payload = {
         cancelled: false,
         modeSelect: selectedMode.toString(),
         execution_mode: selectedMode.toString(),
         ...modeSections[selectedMode - 1].collectPayload(),
         ...output.collectPayload()
     };
+
+    const errors = [
+        ...safeCheckValidity(modeSections[selectedMode - 1], payload),
+        ...safeCheckValidity(output, payload)
+    ];
+
+    return errors.length ? { ...payload, cancelled: true, errors } : payload;
 }
 
 // 外部からデータを読み込んだときに、各クラスの画面反映メソッド (apply または applyDefaults) を安全に叩く関数
@@ -126,6 +136,7 @@ async function bootstrap() {
                 await callback();
             } catch (err) {
                 console.error(err);
+                showMessage(`エラー: ${err?.message || err}`);
             } finally {
                 btn.disabled = false;
             }
@@ -158,10 +169,14 @@ async function bootstrap() {
     byId("saveBtn")?.addEventListener("click", withLock("saveBtn", async () => {
         const payload = collectSelectedPayload();
         if (payload.cancelled) {
-            alert("保存処理がキャンセルされました。エラー:", payload.errors);
+            showMessage("エラー: " + payload.errors.join(" / "));
             return;
         }
-        await window.pywebview.api.save_settings(payload, "settings.json");
+
+        const res = await window.pywebview.api.save_settings(payload, "settings.json");
+        if (!res?.ok) {
+            showMessage("エラー: 設定を保存できませんでした。" + (res?.error || ""));
+        }
     }));
 
     // ==========================================
@@ -170,11 +185,14 @@ async function bootstrap() {
     byId("saveAsBtn")?.addEventListener("click", withLock("saveAsBtn", async () => {
         const payload = collectSelectedPayload();
         if (payload.cancelled) {
-            alert("保存処理がキャンセルされました。エラー:", payload.errors);
+            showMessage("エラー: " + payload.errors.join(" / "));
             return;
         }
-        await window.pywebview.api.save_settings_as(payload, "settings.json");
-        console.info("設定を保存しました。");
+
+        const res = await window.pywebview.api.save_settings_as(payload, "settings.json");
+        if (!res?.ok) {
+            showMessage("エラー: 設定を保存できませんでした。" + (res?.error || ""));
+        }
     }));
 
     // ==========================================

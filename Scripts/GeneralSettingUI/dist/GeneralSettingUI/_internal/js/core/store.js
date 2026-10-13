@@ -37,7 +37,8 @@ export class SettingsStore {
 
       // モード5: エンジニアパラメータ設計パラメータ
       m5_oxidant_select: "N2O",
-      m5_fuel_select: "PP",
+      m5_fuel_select: "PE",
+      m5_port_select: "circle",
       m5_F_req: 250,
       m5_I_req: 1500,
       m5_vt: 2000,
